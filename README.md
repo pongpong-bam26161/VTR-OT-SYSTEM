@@ -37,13 +37,20 @@ The app is then at <https://pongpong-bam26161.github.io/VTR-OT-SYSTEM/>.
 2. **Admin → Data → Choose data file**: the `vtr-ot-data.json` file (settings, departments, machines and rates, staff list). It is not in this repository because it contains staff names.
 3. **Admin → Users → Choose HR sheet**: the filled HR authorization workbook (Users tab). Only rows with a login email, a role and Active = Yes are loaded.
 
-### 4. Plan sync from the planning workbook
-1. Open Plan2026-930 → **Extensions → Apps Script**.
-2. Paste [`apps-script/PlanSync.gs`](apps-script/PlanSync.gs). In **Project settings**, tick *Show "appsscript.json"* and replace it with [`apps-script/appsscript.json`](apps-script/appsscript.json).
-3. Set `FIREBASE_PROJECT_ID` at the top of the script.
-4. Run **setupTriggers** once and allow the permissions. It syncs right away and then every day around 08:00 and 17:00.
+### 4. Plan sync from the planning files
+The script reads three Google Sheets whose links are saved in **Admin → Setup**: Plan2026-930 (Radial), Plan2026-Bias and Capacity VTR (daily capacity per line).
 
-The Google account that runs `setupTriggers` must be a member of the Firebase project (Google Cloud console → IAM → *Cloud Datastore User* or *Editor*).
+1. Go to <https://script.google.com> → **New project** (name it, for example, *VTR OT plan sync*).
+2. Paste [`apps-script/PlanSync.gs`](apps-script/PlanSync.gs) into `Code.gs`. In **Project settings**, tick *Show "appsscript.json" manifest file* and replace it with [`apps-script/appsscript.json`](apps-script/appsscript.json).
+3. Set `FIREBASE_PROJECT_ID` at the top of the script.
+4. Run **setupTriggers** once and allow the permissions. It syncs right away and then every day around 08:00 and 17:00 (Bangkok time).
+
+The Google account that runs `setupTriggers` must be able to open the three files and be a member of the Firebase project (Google Cloud console → IAM → *Cloud Datastore User* or *Editor*).
+
+How OT hours are worked out:
+- **Detailed plan tabs, per machine:** 172 FBM / SBM, 161 (rate by rim size), 162 (43 per 8 h), ply cutting Stock 1–5 and MT1/MT2 (rolls per hour), bead Radial and Bias (as a whole department).
+- **Capacity VTR daily tab:** every other line (mixing, calenders, tubbers, belt, gum calender, cap ply, Searim, MT, band building, curing, uniformity) uses the planner's working hours for that date and shift. Curing runs 12 h, so 4 h OT per shift.
+- Working hours are rounded up to the next whole hour; OT = working hours − normal hours.
 
 ## Roles and permissions
 Enforced by [`firestore.rules`](firestore.rules), using the user list loaded from the HR sheet:
