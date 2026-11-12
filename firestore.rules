@@ -1,0 +1,82 @@
+rules_version = '2';
+// Who can do what in the VTR OT System.
+// Every signed-in person must have an active record in /users/{email} (loaded by an admin from the HR sheet).
+// The planning-workbook script writes plans with the owner's Google account (server access), so it is not limited by these rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null && request.auth.token.email != null; }
+    function email() { return request.auth.token.email.lower(); }
+    function userDoc() { return get(/databases/$(database)/documents/users/$(email())); }
+    function active() { return signedIn() && exists(/databases/$(database)/documents/users/$(email())) && userDoc().data.active != false; }
+    function hasRole(r) { return active() && r in userDoc().data.roleNames; }
+    function admin() { return hasRole('Admin'); }
+    function myDept(d) { return d in userDoc().data.depts; }
+    function myDivision(v) { return userDoc().data.divisions.size() == 0 || v in userDoc().data.divisions; }
+    function changes(keys) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys); }
+
+    // User list: each person reads their own record; only admins change it.
+    match /users/{userEmail} {
+      allow read: if signedIn() && (userEmail == email() || admin());
+      allow write: if admin();
+    }
+
+    // Settings, departments, machines, rates and staff list.
+    match /config/{doc} {
+      allow read: if active();
+      allow write: if admin();
+    }
+    match /staff/{dept} {
+      allow read: if active();
+      allow write: if admin() || hasRole('HR (view only)') || hasRole('HR');
+    }
+
+    // Production plans: planners and admins (the workbook script also writes here).
+    match /plans/{id} {
+      allow read: if active();
+      allow write: if admin() || hasRole('Planner');
+    }
+    match /sync/{doc} {
+      allow read: if active();
+      allow write: if admin() || hasRole('Planner');
+    }
+
+    // OT requests.
+    match /requests/{id} {
+      allow read: if active();
+      // Department managers create requests for their own departments only.
+      allow create: if admin() || (hasRole('Department manager') && myDept(request.resource.data.dept)
+        && request.resource.data.status in ['pending', 'div_approved']);
+      allow update: if admin()
+        // Department manager: edit, resend, confirm "worked" on their own department's requests that are not final yet.
+        || (hasRole('Department manager') && myDept(resource.data.dept) && myDept(request.resource.data.dept)
+            && resource.data.status in ['pending', 'returned', 'div_approved', 'approved']
+            && ((resource.data.status in ['pending', 'returned'] && request.resource.data.status in ['pending', 'returned', 'div_approved'])
+                || changes(['lines', 'history'])))
+        // Division manager: approve, send back or reject requests of their division.
+        || (hasRole('Division manager') && myDivision(resource.data.division)
+            && changes(['status', 'history']) && request.resource.data.status in ['div_approved', 'returned', 'rejected'])
+        // Plant manager: approve the day or send it back.
+        || (hasRole('Plant manager') && changes(['status', 'history']) && request.resource.data.status in ['approved', 'pending']);
+      allow delete: if admin() || (hasRole('Department manager') && myDept(resource.data.dept) && resource.data.status in ['pending', 'returned']);
+    }
+
+    // Actual run hours after the shift.
+    match /actuals/{id} {
+      allow read: if active();
+      allow write: if admin() || (hasRole('Department manager') && myDept(request.resource.data.dept));
+    }
+
+    // Plant manager's daily approvals.
+    match /days/{date} {
+      allow read: if active();
+      allow write: if admin() || hasRole('Plant manager');
+    }
+
+    // Fingerprint scans: accountants, HR and admins only.
+    match /attendance/{date} {
+      allow read: if admin() || hasRole('Accountant') || hasRole('HR (view only)') || hasRole('HR');
+      allow write: if admin() || hasRole('Accountant') || hasRole('HR (view only)') || hasRole('HR');
+    }
+  }
+}

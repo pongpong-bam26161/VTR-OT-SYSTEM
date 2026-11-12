@@ -1,0 +1,1386 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>VTR OT System</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky role bar + tab strip, single working column (max 1100px) of cards and tables; mobile-first for managers on phones. */
+:root{
+  --bg:#eef1f4; --surface:#ffffff; --surface-2:#f6f8fa; --ink:#16202a; --muted:#5a6775; --line:#d6dde4;
+  --accent:#1d5ea8; --accent-ink:#ffffff; --accent-soft:#e2ecf8;
+  --ok:#2b7a4b; --ok-soft:#e1f2e8; --warn:#9a5b00; --warn-soft:#fbefd9; --bad:#b0281f; --bad-soft:#fbe4e2;
+  --bar-1:#9fb3c8; --bar-2:#6f9fd6; --bar-3:#1d5ea8;
+  --f-display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1418; --surface:#182028; --surface-2:#1d2630; --ink:#e5eaef; --muted:#93a1af; --line:#2b3642;
+  --accent:#6ea6ea; --accent-ink:#0b1622; --accent-soft:#1b2c40;
+  --ok:#5cc08a; --ok-soft:#173326; --warn:#e2a647; --warn-soft:#3a2b12; --bad:#ef7d74; --bad-soft:#3d1c1a;
+  --bar-1:#4a5b6d; --bar-2:#4f7fb8; --bar-3:#8ab8f0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1418; --surface:#182028; --surface-2:#1d2630; --ink:#e5eaef; --muted:#93a1af; --line:#2b3642;
+  --accent:#6ea6ea; --accent-ink:#0b1622; --accent-soft:#1b2c40;
+  --ok:#5cc08a; --ok-soft:#173326; --warn:#e2a647; --warn-soft:#3a2b12; --bad:#ef7d74; --bad-soft:#3d1c1a;
+  --bar-1:#4a5b6d; --bar-2:#4f7fb8; --bar-3:#8ab8f0; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding-block:10px}
+.brand{font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.01em;margin-right:auto;display:flex;align-items:center;gap:8px}
+.brand i{display:inline-block;width:10px;height:22px;background:var(--accent);border-radius:2px}
+.rolebox{display:flex;gap:8px;flex-wrap:wrap}
+.tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:0;scrollbar-width:none}
+.tabs button{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.02em;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:8px 10px 9px;cursor:pointer;white-space:nowrap}
+.tabs button[aria-current="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+main{padding-block:18px 60px;display:flex;flex-direction:column;gap:16px}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;margin:0;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:600;font-size:18px;margin:0}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.row>*{min-width:0}
+.grow{flex:1 1 160px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+input,select,textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:9px 10px;min-height:42px;width:100%}
+textarea{min-height:120px;font-family:var(--f-mono);font-size:13px}
+input[type=checkbox]{width:22px;height:22px;min-height:0;accent-color:var(--accent)}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn{font:inherit;font-weight:600;font-size:15px;border-radius:6px;padding:10px 16px;min-height:42px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.btn.bad{background:transparent;border-color:var(--bad);color:var(--bad)}
+.btn.sm{padding:6px 10px;min-height:34px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.pill.ok{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.pill.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.pill.bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.pill.acc{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.note{border-radius:6px;padding:10px 12px;background:var(--accent-soft);color:var(--ink);font-size:14px}
+.note.warn{background:var(--warn-soft)}
+.note.bad{background:var(--bad-soft)}
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.calc div{background:var(--surface-2);border-radius:6px;padding:10px 12px}
+.calc b{display:block;font-family:var(--f-mono);font-size:22px;font-weight:500}
+.calc span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.tablewrap{overflow-x:auto;margin:0 -16px;padding:0 16px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;font-weight:600;padding:8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.r,th.r{text-align:right}
+tfoot td{font-weight:600;border-bottom:0}
+table input,table select{min-height:36px;padding:6px 8px}
+.emp{display:grid;grid-template-columns:auto 1fr 84px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.emp:last-child{border-bottom:0}
+.emp .who{min-width:0}
+.emp .who b{display:block;font-weight:500;overflow-wrap:anywhere}
+.emp input[type=number]{text-align:right}
+.reqhead{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.reqhead h3{margin-right:auto}
+.lines{font-size:14px;display:flex;flex-direction:column;gap:2px}
+.hist{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:2px;border-top:1px dashed var(--line);padding-top:8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.kpi b{display:block;font-family:var(--f-mono);font-size:26px;font-weight:500}
+.kpi>span:not(.pill){font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block}
+.kpi .pill{margin-top:4px;margin-right:2px}
+.bars{display:flex;flex-direction:column;gap:12px}
+.bargroup{display:grid;grid-template-columns:minmax(90px,140px) 1fr;gap:4px 10px;align-items:center}
+.bargroup .lbl{font-weight:500;font-size:14px;grid-row:span 3;overflow-wrap:anywhere}
+.track{display:flex;align-items:center;gap:6px;min-width:0}
+.track i{display:block;height:10px;border-radius:2px;min-width:2px}
+.track em{font-style:normal;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;background:var(--c)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:13px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:6px;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.toast{animation:up .2s ease-out}@keyframes up{from{opacity:0;transform:translate(-50%,8px)}}}
+</style>
+
+</head>
+<body>
+<div class="top">
+  <div class="wrap">
+    <div class="bar">
+      <div class="brand"><i></i>VTR OT System</div>
+      <div class="rolebox">
+        <select id="role" aria-label="Role"></select>
+        <select id="mydept" aria-label="My department"></select>
+        <select id="mydiv" data-bind="mydiv" aria-label="My division"></select>
+      </div>
+      <span id="conn" class="pill">Connecting…</span>
+      <button id="signout" class="btn sm" data-act="signout" hidden>Sign out</button>
+    </div>
+    <nav class="tabs" id="tabs"></nav>
+  </div>
+</div>
+<main class="wrap" id="main"><div class="empty">Loading…</div></main>
+<div id="toast" class="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+/* ============ Example master data (shown until real data is saved in Setup) ============ */
+/* No company data is kept in the code (the repository is public). Departments, machines, rates and staff
+   live in Firestore and are loaded by an admin from the data file (Admin → Data). */
+const EXAMPLE={example:true,normalHours:8,rounding:'nearest',autoApprove:true,rateWeekday:1.5,rateWeekend:2,rateHoliday:2,tolerance:10,attGrace:10,
+  holidays:[],reasons:['อื่นๆ / Other'],shifts:[{id:'D',name:'Day',start:'06:30',end:'16:30'},{id:'N',name:'Night',start:'18:30',end:'04:30'}],
+  depts:[],machines:[],employees:[]};
+
+/* ============ State & storage ============ */
+const S={config:null,staff:{},plans:{},requests:{},actuals:{},days:{},attendance:{},sync:null,users:{},_cfg:null};
+const COLLS=['plans','requests','actuals','days'];
+let db=null,mode='connecting',me={id:null},userNs=null,dl=null;
+const nameCache={};
+const LS='otp-local-v1';
+function rebuildCfg(){
+  if(!S.config){S._cfg=null;return}
+  const emps=[];for(const [d,doc] of Object.entries(S.staff||{}))for(const a of (doc.list||[]))emps.push({id:a[0],name:a[1],crew:a[2],dept:d,position:a[3],kind:a[4],link:a[5]});
+  emps.sort((a,b)=>a.dept.localeCompare(b.dept)||String(a.crew).localeCompare(String(b.crew))||a.name.localeCompare(b.name));
+  S._cfg={...S.config,machines:S.config.machines||[],employees:emps};
+}
+function cfg(){return S._cfg||EXAMPLE}
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+
+let myAccess=null;
+const ROLE_KEYS={'Department manager':'dept','Division manager':'division','Plant manager':'plant','Planner':'planner','Accountant':'accountant','HR (view only)':'hr','HR':'hr','Admin':'admin'};
+function allowedRoles(){
+  if(!myAccess)return Object.keys(ROLES);
+  const keys=[...new Set((myAccess.roleNames||[]).map(n=>ROLE_KEYS[n]).filter(Boolean))];
+  return keys.includes('admin')?Object.keys(ROLES):keys;
+}
+const isAdmin=()=>!myAccess||(myAccess.roleNames||[]).includes('Admin');
+async function initStore(){
+  if(window.FIREBASE_CONFIG&&window.firebase){
+    try{if(!firebase.apps.length)firebase.initializeApp(window.FIREBASE_CONFIG)}catch(e){}
+    mode='auth';render();
+    firebase.auth().onAuthStateChanged(async u=>{
+      if(!u){mode='signin';myAccess=null;render();return}
+      me={id:u.uid,name:u.displayName||u.email,email:(u.email||'').toLowerCase()};
+      db=firebase.firestore();
+      try{const d=await db.collection('users').doc(me.email).get();myAccess=d.exists?d.data():null}catch(e){myAccess=null}
+      if(!myAccess||myAccess.active===false){mode='noaccess';render();return}
+      const ok=allowedRoles();if(!ok.includes(role)){role=ok[0]||'dept';tab=ROLES[role].tabs[0][0]}
+      if(role==='dept'&&!isAdmin()&&(myAccess.depts||[]).length&&!(myAccess.depts||[]).includes(myDept))myDept=myAccess.depts[0];
+      if(role==='division'&&!isAdmin()&&(myAccess.divisions||[]).length===1)V.myDiv=myAccess.divisions[0];
+      startLive();
+    });
+    return;
+  }
+  mode='local';
+  try{const o=JSON.parse(lsGet(LS)||'null');if(o){Object.assign(S,o);S.staff=S.staff||{};S.attendance=S.attendance||{}}}catch(e){}rebuildCfg();
+  render();
+}
+function startLive(){
+  mode='connecting';render();
+  const seeScans=isAdmin()||(myAccess.roleNames||[]).some(n=>/^(Accountant|HR)/.test(n));
+  let got=0;const need=(seeScans?3:2)+COLLS.length;
+  const timer=setTimeout(()=>{if(got<need){mode='slow';render()}},10000);
+  const done=()=>{got++;if(got>=need){clearTimeout(timer);mode='live'}scheduleRender()};
+  const seen=new Set();
+  db.doc('sync/state').onSnapshot(s=>{S.sync=s.exists?s.data():null;scheduleRender()},()=>{});
+  db.doc('config/main').onSnapshot(s=>{S.config=s.exists?s.data():null;rebuildCfg();if(!seen.has('c')){seen.add('c');done()}else scheduleRender()},err);
+  if(seeScans)db.collection('attendance').orderBy('date','desc').limit(93).onSnapshot(snap=>{const o={};snap.docs.forEach(d=>{o[d.id]=d.data()});S.attendance=o;if(!seen.has('att')){seen.add('att');done()}else scheduleRender()},err);
+  db.collection('staff').onSnapshot(snap=>{const o={};snap.docs.forEach(d=>{o[d.id]=d.data()});S.staff=o;rebuildCfg();if(!seen.has('staff')){seen.add('staff');done()}else scheduleRender()},err);
+  for(const c of COLLS){
+    db.collection(c).onSnapshot(snap=>{const o={};snap.docs.forEach(d=>{o[d.id]=d.data()});S[c]=o;if(!seen.has(c)){seen.add(c);done()}else scheduleRender()},err);
+  }
+  if(isAdmin())db.collection('users').onSnapshot(snap=>{const o={};snap.docs.forEach(d=>{o[d.id]=d.data()});S.users=o;scheduleRender()},()=>{});
+}
+function err(e){toast(e&&e.code==='permission-denied'?'Your account is not allowed to read this data. Ask the admin to check your role.':'Could not sync: '+(e&&e.message||'unknown error'))}
+function saveLocal(){const {_cfg,...o}=S;lsSet(LS,JSON.stringify(o))}
+async function put(coll,id,data){
+  if(mode==='local'||!db){ if(coll==='config'){S.config=data}else{S[coll][id]=data} rebuildCfg();saveLocal();scheduleRender();return }
+  const clean=JSON.parse(JSON.stringify(data)); /* Firestore refuses undefined values */
+  if(coll==='config') return db.doc('config/main').set(clean);
+  return db.collection(coll).doc(id).set(clean);
+}
+async function del(coll,id){
+  if(mode==='local'||!db){delete S[coll][id];rebuildCfg();saveLocal();scheduleRender();return}
+  return db.collection(coll).doc(id).delete();
+}
+
+/* ============ Helpers ============ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=(x,d=1)=>x==null||isNaN(x)?'–':(+x).toFixed(d).replace(/\.0+$/,'');
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const addDays=(s,n)=>{const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const fmtDate=s=>{const d=new Date(s+'T00:00:00');return d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const dept=id=>cfg().depts.find(d=>d.id===id);
+const emp=id=>cfg().employees.find(e=>e.id===id);
+const shift=id=>cfg().shifts.find(s=>s.id===id);
+const empName=id=>emp(id)?.name||'(removed staff)';
+function addTime(t,h){if(!t)return '';const[a,b]=t.split(':').map(Number);let m=Math.round(a*60+b+h*60);m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
+function dayInfo(date){
+  const c=cfg(),d=new Date(date+'T00:00:00'),dow=d.getDay(),hol=(c.holidays||[]).includes(date),we=dow===0||dow===6;
+  return {normal:(hol||we)?0:+c.normalHours, mult:hol?+c.rateHoliday:we?+c.rateWeekend:+c.rateWeekday,
+    label:hol?'Public holiday':dow===6?'Saturday':dow===0?'Sunday':'Weekday', off:hol||we};
+}
+function rnd(x){const m=cfg().rounding,v=x*2;return (m==='up'?Math.ceil(v-1e-9):m==='down'?Math.floor(v+1e-9):Math.round(v+1e-9))/2}
+const pk=(date,sh,d)=>`${date}_${sh}_${d}`;
+const machine=id=>(cfg().machines||[]).find(m=>m.id===id);
+const machinesOf=d=>(cfg().machines||[]).filter(m=>m.dept===d&&+m.rate>0);
+/* A department ending in 0 (e.g. 130) also covers its units (131, 132). Used for management OT. */
+const parentOf=c=>{c=String(c);if(c.endsWith('0'))return null;const p=c.slice(0,-1)+'0';return dept(p)?p:null};
+const machinesUnder=d=>(cfg().machines||[]).filter(m=>+m.rate>0&&(m.dept===d||parentOf(m.dept)===d));
+const hasRate=d=>machinesOf(d).length>0;
+function justified(date,sh,mId){
+  const m=machine(mId),p=S.plans[pk(date,sh,mId)];
+  if(!m||!(+m.rate>0)||!p||!(+p.qty>0))return null;
+  const req=p.hours!=null?+p.hours:+p.qty/+m.rate;
+  return {qty:+p.qty,reqHours:req,detail:p.detail||null,actualHours:p.actualHours??null,ot:Math.max(0,rnd(req-dayInfo(date).normal)),m};
+}
+/* Management OT follows the longest-running planned machine in the linked department. */
+function deptJustified(date,sh,d){
+  let best=null;for(const m of machinesUnder(d)){const j=justified(date,sh,m.id);if(j&&(!best||j.ot>best.ot))best=j}
+  return best;
+}
+function deptActualRun(date,sh,d){
+  let best=null;for(const m of machinesUnder(d)){const a=S.actuals[pk(date,sh,m.id)];if(a&&(best==null||+a.run>best))best=+a.run}
+  return best;
+}
+function defaultStart(date,sh){const s=shift(sh);if(!s)return '';return dayInfo(date).off?s.start:s.end}
+function lineActual(r,l){
+  if(r.type==='replacement'||r.type==='other')return l.worked===true?+l.hours:l.worked===false?0:null;
+  const run=r.type==='production'?(S.actuals[pk(r.date,r.shift,r.machine)]?.run??null):deptActualRun(r.date,r.shift,r.dept);
+  if(run==null)return null;
+  return Math.max(0,rnd(+run-dayInfo(r.date).normal));
+}
+const STATUS={pending:['Waiting for division manager','warn'],returned:['Sent back for changes','bad'],div_approved:['Waiting for plant manager','acc'],approved:['Approved','ok'],rejected:['Rejected','bad']};
+const TYPE={production:'Production',management:'Management',replacement:'Replacement',other:'Other'};
+function statusPill(r){const[t,c]=STATUS[r.status]||[r.status,''];return `<span class="pill ${c}">${t}</span>`}
+function hist(r,action,note){return [...(r.history||[]),{at:new Date().toISOString(),by:me.id||null,byName:me.name||'',role:ROLES[role]?.label||role,action,note:note||''}]}
+function whoName(h){const n=h.byName||(h.by&&nameCache[h.by]);return n?`${n} (${h.role})`:h.role}
+async function resolveNames(){
+  if(!userNs||!userNs.profiles)return;
+  const ids=new Set();Object.values(S.requests).forEach(r=>(r.history||[]).forEach(h=>h.by&&!(h.by in nameCache)&&ids.add(h.by)));
+  Object.values(S.days).forEach(d=>d.by&&!(d.by in nameCache)&&ids.add(d.by));
+  if(!ids.size)return;
+  try{const ps=await userNs.profiles([...ids]);let ch=false;for(const id of ids){nameCache[id]=(ps&&ps[id]&&ps[id].name)||'';ch=true}if(ch)scheduleRender()}catch(e){}
+}
+function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2600)}
+
+/* ============ Roles & tabs ============ */
+const ROLES={
+  planner:{label:'Planner',tabs:[['plan','Production plan']]},
+  dept:{label:'Department manager',tabs:[['request','New request'],['mine','My requests'],['actual','Actual hours']]},
+  division:{label:'Division manager',tabs:[['approve','Approvals'],['all','All requests']]},
+  plant:{label:'Plant manager',tabs:[['dash','Dashboard'],['daily','Daily approval'],['stats','Statistics'],['all','All requests']]},
+  accountant:{label:'Accountant',tabs:[['payroll','Payroll summary'],['attend','Attendance check'],['stats','Statistics']]},
+  hr:{label:'HR',tabs:[['attend','Attendance check'],['payroll','Payroll summary']]},
+  admin:{label:'Admin',tabs:[['setup','Setup'],['users','Users'],['data','Data'],['attend','Attendance check'],['stats','Statistics']]}
+};
+let role=lsGet('otp-role')||'dept';if(!ROLES[role])role='dept';
+let tab=lsGet('otp-tab-'+role)||ROLES[role].tabs[0][0];
+let myDept=lsGet('otp-dept')||'130';
+
+/* ============ View state ============ */
+const V={
+  planDate:addDays(todayStr(),0),planShift:'S1',
+  draft:null,
+  filterDate:'',
+  dailyDate:'',
+  from:addDays(todayStr(),-14),to:addDays(todayStr(),14),
+  sFrom:addDays(todayStr(),-30),sTo:addDays(todayStr(),14),
+  setup:null,importText:'',csv:'',imp:null,impMsg:'',att:null,attMsg:'',attFilter:'issues',payBasis:'verified',divDate:'',dFrom:addDays(todayStr(),-13),dTo:addDays(todayStr(),1),dashDiv:'',myDiv:lsGet('otp-div')||''
+};
+function newDraft(){return {date:todayStr(),shift:cfg().shifts[0]?.id||'',type:'production',sel:{},start:'',reason:'',note:'',absent:'',repl:'',replHours:+cfg().normalHours}}
+
+/* ============ Render core ============ */
+let rq=false;
+function scheduleRender(){if(rq)return;rq=true;requestAnimationFrame(()=>{rq=false;const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&$('#main').contains(a)){pendingRender=true;return}render()})}
+let pendingRender=false;
+document.addEventListener('focusout',()=>{if(pendingRender){pendingRender=false;setTimeout(()=>{const a=document.activeElement;if(!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)))render();else pendingRender=true},0)}});
+
+function render(){
+  const c=cfg();
+  $('#signout').hidden=!(mode==='live'||mode==='slow'||mode==='connecting'||mode==='noaccess');
+  if(mode==='auth'||mode==='signin'||mode==='noaccess'){
+    $('#conn').className='pill';$('#conn').textContent=mode==='auth'?'Starting…':'Signed out';
+    $('#role').hidden=true;$('#mydept').hidden=true;$('#mydiv').hidden=true;$('#tabs').innerHTML='';
+    $('#main').innerHTML=mode==='auth'?'<div class="empty">Loading…</div>':mode==='signin'
+      ?`<div class="card" style="max-width:460px;margin:40px auto;text-align:center;align-items:center"><h2>VTR OT System</h2><p class="muted">Sign in with your company Google account.</p><button class="btn primary" data-act="signin">Sign in with Google</button></div>`
+      :`<div class="card" style="max-width:520px;margin:40px auto"><h2>No access yet</h2><p>You are signed in as <b>${esc(me.email||'')}</b>, but this account is not on the user list, or it is not active.</p><p class="muted">Ask the admin to add you (Admin → Users), then sign in again.</p></div>`;
+    return;
+  }
+  $('#role').hidden=false;
+  const conn=$('#conn');
+  conn.className='pill '+(mode==='live'?'ok':mode==='local'?'warn':'');
+  conn.textContent=mode==='live'?(me.name?me.name:'Live'):mode==='local'?'Offline · this browser only':mode==='slow'?'Still connecting…':'Connecting…';
+  const okRoles=allowedRoles();if(!okRoles.includes(role))role=okRoles[0]||'dept';
+  $('#role').innerHTML=Object.entries(ROLES).filter(([k])=>okRoles.includes(k)).map(([k,v])=>`<option value="${k}"${k===role?' selected':''}>${v.label}</option>`).join('');
+  const md=$('#mydept');md.hidden=role!=='dept';
+  if(!dept(myDept)&&c.depts[0])myDept=c.depts[0].id;
+  const myDepts=isAdmin()||!(myAccess&&(myAccess.depts||[]).length)?c.depts:c.depts.filter(d=>(myAccess.depts||[]).includes(d.id));
+  if(myDepts.length&&!myDepts.find(d=>d.id===myDept))myDept=myDepts[0].id;
+  md.innerHTML=myDepts.map(d=>`<option value="${esc(d.id)}"${d.id===myDept?' selected':''}>${esc(d.id)} ${esc(d.name)}</option>`).join('');
+  const mv=$('#mydiv');mv.hidden=role!=='division';const divs=[...new Set(c.depts.map(d=>d.division).filter(Boolean))].filter(x=>isAdmin()||!(myAccess&&(myAccess.divisions||[]).length)||(myAccess.divisions||[]).includes(x));
+  mv.innerHTML=(isAdmin()||divs.length>1?`<option value="">All divisions</option>`:'')+divs.map(x=>`<option${x===V.myDiv?' selected':''}>${esc(x)}</option>`).join('');
+  const tabs=ROLES[role].tabs;if(!tabs.find(t=>t[0]===tab))tab=tabs[0][0];
+  $('#tabs').innerHTML=tabs.map(([k,l])=>`<button data-act="tab" data-v="${k}" aria-current="${k===tab}">${l}</button>`).join('');
+  const views={plan:vPlan,request:vRequest,mine:vMine,actual:vActual,approve:vApprove,dash:vDash,all:vAll,daily:vDaily,stats:vStats,payroll:vPayroll,attend:vAttend,users:vUsers,data:vData,setup:vSetup};
+  let banner='';
+  if(c.example)banner=`<div class="note warn small"><b>No company data yet.</b> An admin loads the data file in <b>Admin → Data</b>, then the user list in <b>Admin → Users</b>.</div>`;
+  if(mode==='local')banner+=`<div class="note small">Firebase is not configured, so data is saved in this browser only. Fill in <b>firebase-config.js</b> (see README).</div>`;
+  $('#main').innerHTML=banner+views[tab]();
+  resolveNames();
+}
+
+/* ============ Planner ============ */
+function shiftSel(id,val,act){return `<select id="${id}" data-bind="${act}">${cfg().shifts.map(s=>`<option value="${esc(s.id)}"${s.id===val?' selected':''}>${esc(s.name)} (${esc(s.start)}–${esc(s.end)})</option>`).join('')}</select>`}
+function vPlan(){
+  const c=cfg(),di=dayInfo(V.planDate);if(!shift(V.planShift))V.planShift=c.shifts[0]?.id||'';
+  const rows=c.depts.filter(d=>hasRate(d.id)).map(d=>`<tr><td colspan="8" style="background:var(--surface-2);font-weight:600">${esc(d.name)}</td></tr>`+machinesOf(d.id).map(m=>{
+    const p=S.plans[pk(V.planDate,V.planShift,m.id)],j=justified(V.planDate,V.planShift,m.id);
+    return `<tr><td>${esc(m.name)}</td><td class="r num">${fmt(m.rate,2)} ${esc(m.unit)}/h</td>
+      <td style="width:150px"><input type="number" min="0" step="any" inputmode="decimal" id="plan-${esc(m.id)}" data-bind="planqty" data-d="${esc(m.id)}" value="${p?esc(p.qty):''}" placeholder="0"></td>
+      <td class="r num" id="ph-${esc(m.id)}">${j?fmt(j.reqHours,2):'–'}</td>
+      <td class="r num" id="po-${esc(m.id)}"><b>${j?fmt(j.ot):'–'}</b></td>
+      <td class="r num">${+m.crew?fmt(m.crew,0):'–'}</td><td class="r num" id="pt-${esc(m.id)}">${j&&+m.crew?fmt(j.ot*m.crew):'–'}</td><td class="r num">${j&&j.actualHours!=null?fmt(j.actualHours,1)+' h':'<span class="muted small">'+(j?'waiting':'–')+'</span>'}</td></tr>${j&&j.detail&&j.detail.length>1?`<tr><td colspan="8" class="small muted" style="padding-top:0">${j.detail.slice(0,8).map(x=>esc(x.m)+' '+fmt(x.h,1)+' h').join(' · ')}${j.detail.length>8?' · …':''}</td></tr>`:''}`}).join('')).join('');
+  return `<div><h2>Production plan</h2><p class="muted">The plan comes from the planning workbook automatically. You can also load a file or type the planned quantity for a machine. OT per person is calculated as soon as you type.</p></div>${syncLine()}${importCard()}
+  <div class="card"><div class="row">
+    <label class="f grow">Date<input type="date" id="pdate" data-bind="pdate" value="${V.planDate}"></label>
+    <label class="f grow">Shift${shiftSel('pshift',V.planShift,'pshift')}</label></div>
+    <div class="note small">${di.label}: normal hours <b>${di.normal}</b>, OT pay <b>${di.mult}×</b>. Required hours = plan ÷ rate. OT per person = required hours − ${di.normal}, rounded to 0.5 h.</div>
+    <div class="tablewrap"><table><thead><tr><th>Machine / line</th><th class="r">Rate</th><th>Plan qty</th><th class="r">Required h</th><th class="r">OT / person</th><th class="r">Crew</th><th class="r">OT total</th><th class="r">Output needed</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="row"><button class="btn primary" data-act="saveplan">Save plan</button></div></div>`;
+}
+function planPreview(d){
+  const dep=machine(d),v=+$('#plan-'+CSS.escape(d)).value,di=dayInfo(V.planDate);
+  const ok=v>0&&dep.rate>0,req=ok?v/dep.rate:null,ot=ok?Math.max(0,rnd(req-di.normal)):null;
+  $('#ph-'+CSS.escape(d)).textContent=ok?fmt(req,2):'–';$('#po-'+CSS.escape(d)).innerHTML='<b>'+(ok?fmt(ot):'–')+'</b>';$('#pt-'+CSS.escape(d)).textContent=ok&&+dep.crew?fmt(ot*dep.crew):'–';
+}
+async function savePlan(){
+  const ps=[];
+  for(const m of (cfg().machines||[]).filter(m=>+m.rate>0)){
+    const el=$('#plan-'+CSS.escape(m.id));if(!el)continue;const v=el.value.trim(),k=pk(V.planDate,V.planShift,m.id),cur=S.plans[k];
+    if(v===''){if(cur)ps.push(del('plans',k));continue}
+    if(cur&&+cur.qty===+v)continue;
+    ps.push(put('plans',k,{date:V.planDate,shift:V.planShift,dept:m.dept,machine:m.id,qty:+v,at:new Date().toISOString(),by:me.id||null}));
+  }
+  try{await Promise.all(ps);toast(ps.length?'Plan saved':'No changes to save')}catch(e){toast('Could not save plan: '+(e.message||e.code))}
+}
+
+/* ============ Dept manager: request ============ */
+function vRequest(){
+  const c=cfg(),D=dept(myDept);if(!D)return `<div class="empty">Choose your department at the top.</div>`;
+  const dr=V.draft||(V.draft=newDraft());if(!shift(dr.shift))dr.shift=c.shifts[0]?.id||'';
+  const ms=machinesOf(D.id);
+  if(dr.type==='production'&&!ms.find(m=>m.id===dr.machine))dr.machine=(ms.map(m=>[m,justified(dr.date,dr.shift,m.id)]).filter(x=>x[1]).sort((a,b)=>b[1].ot-a[1].ot)[0]?.[0]||ms[0])?.id||'';
+  prefill(dr,D);
+  const M=machine(dr.machine);
+  const di=dayInfo(dr.date),j=dr.type==='production'?justified(dr.date,dr.shift,dr.machine):deptJustified(dr.date,dr.shift,D.id),start=dr.start||defaultStart(dr.date,dr.shift);
+  const types=[['production','Production (by quantity)'],['management','Management (by operation time)'],['replacement','Replacement (absence)'],['other','Other (maintenance, support…)']];
+  let body='',evalr=evalDraft();
+  const mSel=dr.type==='production'&&ms.length?`<label class="f">Machine / line<select id="dmach" data-bind="dmach">${ms.map(m=>{const jj=justified(dr.date,dr.shift,m.id);return `<option value="${esc(m.id)}"${m.id===dr.machine?' selected':''}>${esc(m.name)}${jj?` · plan ${fmt(jj.qty,0)} ${esc(m.unit)} · OT ${fmt(jj.ot)} h`:' · no plan'}</option>`}).join('')}</select></label>`:'';
+  if(dr.type==='production'&&!ms.length)body=`<div class="note warn">${esc(D.name)} has no machine with a production rate, so production OT cannot be calculated. Use Management or Replacement OT, or add a rate in Setup.</div>`;
+  else if(dr.type==='replacement'){
+    const absentees=c.employees.filter(e=>e.dept===D.id);
+    const a=emp(dr.absent);
+    const cands=c.employees.filter(e=>e.dept===D.id&&e.id!==dr.absent&&(!a||e.crew!==a.crew));
+    body=`<div class="split"><label class="f">Absent person<select id="rabs" data-bind="dabsent"><option value="">Choose…</option>${absentees.map(e=>`<option value="${e.id}"${e.id===dr.absent?' selected':''}>${esc(e.name)} · crew ${esc(e.crew)}</option>`).join('')}</select></label>
+      <label class="f">Replacement (other crew)<select id="rrep" data-bind="drepl"><option value="">Choose…</option>${cands.map(e=>`<option value="${e.id}"${e.id===dr.repl?' selected':''}>${esc(e.name)} · crew ${esc(e.crew)}</option>`).join('')}</select></label></div>
+      <div class="row"><label class="f" style="width:130px">OT hours<input type="number" id="rh" step="0.5" min="0" data-bind="dreplh" value="${dr.replHours}"></label>
+      <label class="f" style="width:150px">Start<input type="time" id="rst" data-bind="dstart" value="${esc(start)}"></label>
+      <p class="muted small" style="padding-bottom:10px">Ends ${esc(addTime(start,+dr.replHours||0))}. Replacement is a fixed ${fmt(c.normalHours)} h.</p></div>`;
+  }else{
+    const list=dr.type==='production'?c.employees.filter(e=>e.dept===D.id&&e.kind==='production'):dr.type==='other'?c.employees.filter(e=>e.dept===D.id):c.employees.filter(e=>e.kind==='management'&&e.link===D.id);
+    const def=dr.type==='other'?(+dr.otherHours||4):(j?j.ot:0);
+    const order=['A','B','Day','Night'];const crews=[...new Set(list.map(e=>crewGroup(e.crew)))].sort((a,b)=>((order.indexOf(a)+1)||9)-((order.indexOf(b)+1)||9)||a.localeCompare(b));
+    body=list.length?crews.map(cr=>`<div><h3 style="font-size:15px;margin-bottom:2px">${esc(crewLabel(cr))} <span class="muted small">(${list.filter(e=>crewGroup(e.crew)===cr).length})</span></h3>${list.filter(e=>crewGroup(e.crew)===cr).map(e=>{
+      const on=e.id in dr.sel;return `<div class="emp"><input type="checkbox" id="sel-${e.id}" data-bind="dsel" data-e="${e.id}" ${on?'checked':''} aria-label="Select ${esc(e.name)}">
+      <div class="who"><label for="sel-${e.id}"><b>${esc(e.name)}</b><span class="muted small">${esc(e.id)} · ${esc(e.position)}${dr.type==='management'&&e.dept!==D.id?' · '+esc(dept(e.dept)?.name||e.dept):''}</span></label>${on?`<input id="task-${e.id}" data-bind="dtask" data-e="${e.id}" value="${esc((dr.task||{})[e.id]||'')}" placeholder="Task / area (optional)" style="margin-top:6px;min-height:36px;padding:6px 8px;font-size:14px">`:''}</div>
+      <input type="number" step="0.5" min="0" id="h-${e.id}" data-bind="dhrs" data-e="${e.id}" value="${on?dr.sel[e.id]:def}" ${on?'':'disabled'} aria-label="OT hours"></div>`}).join('')}</div>`).join('')
+      :`<div class="note warn">No ${dr.type==='production'?'production staff':'management staff linked to this department'} found. Check the staff list in Setup.</div>`;
+    body=`<div class="row"><label class="f" style="width:150px">Start time<input type="time" id="dst" data-bind="dstart" value="${esc(start)}"></label>
+      <div class="row" style="padding-bottom:4px">${crews.map(cr=>`<button class="btn sm" data-act="selcrew" data-v="${esc(cr)}">Select ${esc(crewLabel(cr))}</button>`).join('')}<button class="btn sm" data-act="selnone">Clear</button>${lastReq(dr.type)?`<button class="btn sm" data-act="copylast">Copy last request (${fmtDate(lastReq(dr.type).date)})</button>`:''}</div></div>${body}`;
+  }
+  const calcBox=dr.type==='replacement'?'':dr.type==='other'?`<div class="note small">Other OT has no calculation. Enter the hours per person; a reason is required and the division manager always reviews it.</div>`:mSel+(j?`${dr.type==='management'?`<p class="small muted">Management OT follows the longest-running planned machine: <b>${esc(j.m.name)}</b>.</p>`:''}<div class="calc"><div><span>Plan</span><b>${fmt(j.qty,0)}</b><span>${esc(j.m.unit)}</span></div><div><span>Rate</span><b>${fmt(j.m.rate,2)}</b><span>${esc(j.m.unit)}/h</span></div><div><span>Required</span><b>${fmt(j.reqHours,2)}</b><span>hours</span></div><div><span>Justified OT</span><b>${fmt(j.ot)} h</b><span>per person</span></div>${dr.type==='production'?`<div><span>Crew size</span><b>${+j.m.crew?fmt(j.m.crew,0):'not set'}</b><span>people</span></div>`:''}</div>`
+    :(ms.length?`<div class="note warn">No production plan yet for ${esc(dr.type==='production'&&M?M.name:D.name)} on this date and shift. You can still request, but it will need a reason and manual approval.</div>`:''));
+  const ed=dr.editId?S.requests[dr.editId]:null,backN=Object.values(S.requests).filter(r=>r.dept===myDept&&r.status==='returned').length;
+  const edNote=ed?[...(ed.history||[])].reverse().find(h=>h.action==='Sent back for changes')?.note:'';
+  return `<div><h2>${ed?'Edit request':'New OT request'} · ${esc(D.name)}</h2><p class="muted">${di.label}: normal ${di.normal} h, OT paid at ${di.mult}×.</p></div>
+  ${ed?`<div class="note ${ed.status==='returned'?'bad':''} small"><b>Editing your request of ${fmtDate(ed.date)}.</b> ${edNote?`Division manager: “${esc(edNote)}”. `:''}Change what is needed and press Resend. <button class="btn sm" data-act="canceledit" style="margin-left:6px">Cancel editing</button></div>`
+   :backN?`<div class="note bad small">${backN} request${backN>1?'s were':' was'} sent back for changes. Open <b>My requests</b> to edit and resend.</div>`:''}
+  <div class="card"><div class="row"><label class="f grow">Date<input type="date" id="ddate" data-bind="ddate" value="${dr.date}"></label>
+    <label class="f grow">Shift${shiftSel('dshift',dr.shift,'dshift')}</label></div>
+    <div class="chips" role="group" aria-label="OT type">${types.map(([k,l])=>`<button class="chip" data-act="dtype" data-v="${k}" aria-pressed="${dr.type===k}">${l}</button>`).join('')}</div>
+    ${calcBox}</div>
+  <div class="card">${dr.prefillNote?`<div class="note small">${esc(dr.prefillNote)}</div>`:''}${body}</div>
+  <div class="card" id="sumcard">${sumCard(evalr)}</div>`;
+}
+/* Fill the request from the planner's calculation whenever date, shift, type or machine changes.
+   People: the last request for the same machine (or type) in this department, otherwise everyone who fits.
+   Hours: the calculated OT per person. The manager then unticks or edits before submitting. */
+function prefill(dr,D){
+  if(dr.editId)return;
+  if(dr.type==='replacement')return;
+  const c=cfg();
+  const j=dr.type==='production'?justified(dr.date,dr.shift,dr.machine):dr.type==='management'?deptJustified(dr.date,dr.shift,D.id):null;
+  const key=[myDept,dr.date,dr.shift,dr.type,dr.machine,j?j.ot:'-',c.employees.length,Object.keys(S.requests).length>0].join('|');
+  if(dr.prefillKey===key)return;
+  if(dr.prefillKey&&dr.touched&&dr.prefillKey.split('|').slice(0,5).join('|')===key.split('|').slice(0,5).join('|'))return;
+  dr.prefillKey=key;dr.prefillNote='';dr.touched=false;
+  const last=Object.values(S.requests).filter(r=>r.dept===myDept&&r.type===dr.type&&(dr.type!=='production'||r.machine===dr.machine)&&r.date!==dr.date).sort((a,b)=>(b.date+b.createdAt).localeCompare(a.date+a.createdAt))[0];
+  dr.sel={};dr.task={};
+  if(dr.type==='other'){
+    if(last){for(const l of last.lines)if(emp(l.emp)){dr.sel[l.emp]=l.hours;if(l.task)dr.task[l.emp]=l.task}dr.start=last.lines[0]?.start||'';dr.reason=last.reason||'';dr.prefillNote=`Pre-filled with ${Object.keys(dr.sel).length} people from the request of ${fmtDate(last.date)}.`}
+    return;
+  }
+  if(!j){dr.prefillNote='';return}
+  if(!(j.ot>0)){dr.prefillNote=`The plan needs ${fmt(j.reqHours,1)} h, which fits in normal hours. No OT is calculated, so nobody is pre-selected.`;return}
+  let people;
+  if(last)people=last.lines.map(l=>l.emp).filter(id=>emp(id));
+  else if(dr.type==='management')people=c.employees.filter(e=>e.kind==='management'&&e.link===D.id).map(e=>e.id);
+  else{dr.prefillNote=`The plan needs ${fmt(j.ot)} h OT per person. Tap Select Shift A or Select Shift B to tick that crew with ${fmt(j.ot)} h each, then untick anyone absent. Next time the same people are filled in automatically.`;return}
+  for(const id of people)dr.sel[id]=j.ot;
+  if(last)for(const l of last.lines)if(l.task&&dr.sel[l.emp]!=null)dr.task[l.emp]=l.task;
+  dr.prefillNote=last?`Pre-filled from the plan: ${people.length} people × ${fmt(j.ot)} h, the same people as on ${fmtDate(last.date)}. Untick anyone absent or change hours, then submit.`
+    :`Pre-filled from the plan: ${fmt(j.ot)} h for everyone in the department (${people.length} people), because this is the first request${dr.type==='production'?' for this machine':''}. Press Clear and tick only the people working, or untick the others. Next time the same people are filled in automatically.`;
+}
+/* Shift codes from HR: A/A8 = shift A, B/B8 = shift B, Day9-xxxx = day workers, N9-xxxx = night workers. */
+function crewGroup(c){c=String(c||'');if(/^A/i.test(c))return 'A';if(/^B/i.test(c))return 'B';if(/^Day/i.test(c))return 'Day';if(/^N/i.test(c))return 'Night';return c||'Other'}
+function crewLabel(g){return g==='A'?'Shift A':g==='B'?'Shift B':g==='Day'?'Day workers':g==='Night'?'Night workers':'Crew '+g}
+function lastReq(type){if(type==='replacement')return null;return Object.values(S.requests).filter(r=>r.dept===myDept&&r.type===type).sort((a,b)=>(b.date+b.createdAt).localeCompare(a.date+a.createdAt))[0]||null}
+function evalDraft(){
+  const c=cfg(),dr=V.draft,D=dept(myDept);if(!dr||!D)return null;
+  const start=dr.start||defaultStart(dr.date,dr.shift);
+  let lines=[],jPer=null,jTotal=0,over=false,why=[];
+  if(dr.type==='other'){
+    lines=Object.entries(dr.sel).map(([e,h])=>({emp:e,hours:+h||0,start,end:addTime(start,+h||0),task:(dr.task||{})[e]||''}));
+    jPer=0;jTotal=0;over=true;why.push('other OT is not calculated');
+  }else if(dr.type==='replacement'){
+    if(dr.repl)lines=[{emp:dr.repl,hours:+dr.replHours||0,start,end:addTime(start,+dr.replHours||0),absent:dr.absent}];
+    jPer=+c.normalHours;jTotal=lines.length?jPer:0;
+    if(lines.some(l=>l.hours>jPer)){over=true;why.push(`more than ${jPer} h`)}
+  }else{
+    const j=dr.type==='production'?justified(dr.date,dr.shift,dr.machine):deptJustified(dr.date,dr.shift,D.id);jPer=j?j.ot:null;
+    const crew=dr.type==='production'?+(machine(dr.machine)?.crew)||0:0;
+    lines=Object.entries(dr.sel).map(([e,h])=>({emp:e,hours:+h||0,start,end:addTime(start,+h||0),task:(dr.task||{})[e]||''}));
+    if(jPer==null){over=true;why.push('no production plan')}
+    else{
+      jTotal=crew?jPer*crew:jPer*lines.length;
+      if(lines.some(l=>l.hours>jPer)){over=true;why.push(`hours above ${fmt(jPer)} h per person`)}
+      if(crew&&lines.length>crew){over=true;why.push(`${lines.length} people, crew size is ${crew}`)}
+    }
+  }
+  const total=lines.reduce((a,l)=>a+l.hours,0);
+  return {lines,jPer,jTotal,total,over:over&&lines.length>0,why};
+}
+function sumCard(ev){
+  if(!ev)return '';
+  const c=cfg(),dr=V.draft;
+  const auto=c.autoApprove&&!ev.over&&ev.lines.length>0&&ev.total>0;
+  return `<div class="calc"><div><span>People</span><b>${ev.lines.length}</b></div><div><span>Requested</span><b>${fmt(ev.total)} h</b></div><div><span>Justified</span><b>${ev.jPer==null?'–':fmt(ev.jTotal)+' h'}</b></div></div>
+  ${ev.over?`<div class="note warn small"><b>Above the calculated OT</b> (${esc(ev.why.join('; '))}). Pick a reason. This request goes to the division manager.</div>
+    <label class="f">Reason<select id="dreason" data-bind="dreason"><option value="">Choose…</option>${c.reasons.map(r=>`<option${r===dr.reason?' selected':''}>${esc(r)}</option>`).join('')}</select></label>`
+   :ev.lines.length?`<div class="note small">${auto?'Within the calculated OT. It will be <b>approved automatically</b> and go to the plant manager.':'Within the calculated OT. It goes to the division manager.'}</div>`:''}
+  <label class="f">Note (optional)<input id="dnote" data-bind="dnote" value="${esc(dr.note)}" placeholder="Extra details for the approver"></label>
+  <div class="row"><button class="btn primary" data-act="submitreq" ${ev.lines.length&&ev.total>0?'':'disabled'}>${dr.editId?'Resend request':'Submit request'}</button></div>`;
+}
+function refreshSum(){const el=$('#sumcard');if(el)el.innerHTML=sumCard(evalDraft())}
+async function submitReq(){
+  const c=cfg(),dr=V.draft,ev=evalDraft();
+  if(!ev||!ev.lines.length)return toast('Select at least one person');
+  if(dr.type==='replacement'&&!dr.absent)return toast('Choose the absent person');
+  if(ev.over&&!dr.reason)return toast('Pick a reason for the extra OT');
+  const auto=c.autoApprove&&!ev.over;
+  const old=dr.editId?S.requests[dr.editId]:null;
+  if(old&&(old.status==='approved'||old.status==='div_approved'))return toast('This request was approved meanwhile and can no longer be edited');
+  const id=old?old.id:pk(dr.date,dr.shift,myDept)+'_'+dr.type+'_'+uid();
+  if(dr.type==='production'&&!dr.machine)return toast('Choose the machine');
+  const r={id,date:dr.date,shift:dr.shift,dept:myDept,division:dept(myDept)?.division||'',machine:dr.type==='production'?dr.machine:'',type:dr.type,lines:ev.lines,justifiedPer:ev.jPer,justifiedTotal:ev.jTotal,requestedTotal:ev.total,
+    over:ev.over,reason:ev.over?dr.reason:'',note:dr.note||'',status:auto?'div_approved':'pending',autoApproved:auto,mult:dayInfo(dr.date).mult,createdAt:new Date().toISOString(),createdBy:me.id||null};
+  if(old){r.createdAt=old.createdAt;r.createdBy=old.createdBy;r.history=[...(old.history||[]),{at:new Date().toISOString(),by:me.id||null,role:ROLES[role]?.label||role,action:'Edited and resubmitted',note:''}]}
+  else r.history=hist(r,'Submitted');if(auto)r.history.push({at:new Date().toISOString(),by:null,role:'System',action:'Auto-approved (within calculated OT)',note:''});
+  try{await put('requests',id,r);toast(old?(auto?'Resubmitted and auto-approved':'Resubmitted for approval'):(auto?'Submitted and auto-approved':'Submitted for approval'));V.draft={...newDraft(),date:dr.date,shift:dr.shift,type:dr.type};tab='mine';lsSet('otp-tab-'+role,tab);render()}
+  catch(e){toast('Could not submit: '+(e.message||e.code))}
+}
+
+/* ============ Request cards ============ */
+function reqCard(r,opts={}){
+  const D=dept(r.dept),sh=shift(r.shift);
+  const lines=r.lines.map(l=>{const a=lineActual(r,l);return `<div>${esc(empName(l.emp))} · <span class="num">${fmt(l.hours)} h</span> <span class="muted">${esc(l.start)}–${esc(l.end)}</span>${l.task?` <span class="muted">· ${esc(l.task)}</span>`:''}${l.absent?` <span class="muted">for ${esc(empName(l.absent))}</span>`:''}${a!=null?` · actual <b class="num">${fmt(a)} h</b>`:''}</div>`}).join('');
+  return `<div class="card"><div class="reqhead"><h3>${esc(D?.name||r.dept)} · ${TYPE[r.type]}${r.machine?' · '+esc(machine(r.machine)?.name||''):''}</h3>${statusPill(r)}${r.over?'<span class="pill warn">Above calc</span>':''}${r.autoApproved?'<span class="pill">Auto</span>':''}</div>
+  <p class="small muted">${fmtDate(r.date)} · ${esc(sh?.name||r.shift)} · ${r.mult}× · requested <b class="num">${fmt(r.requestedTotal)} h</b> · justified <b class="num">${r.justifiedPer==null?'–':fmt(r.justifiedTotal)+' h'}</b>${r.justifiedPer!=null&&r.type!=='replacement'?` (${fmt(r.justifiedPer)} h/person)`:''}</p>
+  ${r.reason?`<p class="small"><b>Reason:</b> ${esc(r.reason)}</p>`:''}${r.note?`<p class="small"><b>Note:</b> ${esc(r.note)}</p>`:''}
+  <div class="lines">${lines}</div>${opts.actions||''}
+  <div class="hist">${(r.history||[]).map(h=>`<div>${new Date(h.at).toLocaleString(undefined,{dateStyle:'short',timeStyle:'short'})} · ${esc(h.action)} · ${esc(whoName(h))}${h.note?' · “'+esc(h.note)+'”':''}</div>`).join('')}</div></div>`;
+}
+const sortReq=a=>a.sort((x,y)=>(y.date+y.shift).localeCompare(x.date+x.shift)||(y.createdAt||'').localeCompare(x.createdAt||''));
+function vMine(){
+  const list=sortReq(Object.values(S.requests).filter(r=>r.dept===myDept));
+  return `<div><h2>My requests · ${esc(dept(myDept)?.name||'')}</h2></div>`+(list.length?list.map(r=>reqCard(r,{actions:(r.status==='pending'||r.status==='returned')?`${r.status==='returned'?`<div class="note bad small"><b>Sent back:</b> ${esc([...(r.history||[])].reverse().find(h=>h.action==='Sent back for changes')?.note||'No comment')}</div>`:''}<div class="row"><button class="btn sm primary" data-act="editreq" data-id="${esc(r.id)}">Edit and resend</button><button class="btn sm bad" data-act="cancelreq" data-id="${esc(r.id)}">Withdraw request</button></div>`:''})).join(''):`<div class="card empty">No requests yet. Create one in <b>New request</b>.</div>`);
+}
+function vAll(){
+  const dates=[...new Set(Object.values(S.requests).map(r=>r.date))].sort().reverse();
+  const f=V.filterDate;
+  const list=sortReq(Object.values(S.requests).filter(r=>!f||r.date===f));
+  return `<div><h2>All requests</h2></div><div class="chips"><button class="chip" data-act="fdate" data-v="" aria-pressed="${!f}">All dates</button>${dates.slice(0,14).map(d=>`<button class="chip" data-act="fdate" data-v="${d}" aria-pressed="${f===d}">${fmtDate(d)}</button>`).join('')}</div>`+
+    (list.length?list.map(r=>reqCard(r)).join(''):`<div class="card empty">No requests yet.</div>`);
+}
+
+/* ============ Division approval ============ */
+const inMyDiv=r=>!V.myDiv||dept(r.dept)?.division===V.myDiv;
+/* ===== Traffic light: requested OT against the planner's calculation =====
+   Green: at or below the calculation. Yellow: up to the tolerance above it, or OT with no calculation (Other).
+   Red: more than the tolerance above it, or production/management OT without a plan. */
+const tol=()=>(+cfg().tolerance||10)/100;
+function reqColor(r){
+  if(r.type==='other')return 'yellow';
+  if(r.type==='replacement')return r.over?'red':'green';
+  if(r.justifiedPer==null)return 'red';
+  const j=+r.justifiedTotal||0,q=+r.requestedTotal||0;
+  if(q<=j+1e-9)return 'green';
+  return q<=j*(1+tol())+1e-9?'yellow':'red';
+}
+function aggColor(a){return a.j>0?ratioColor(a.q,a.j):a.red?'red':(a.yellow?'yellow':'green')}
+function ratioColor(q,j){if(!(j>0))return q>0?'red':'green';const x=q/j;return x<=1+1e-9?'green':x<=1+tol()+1e-9?'yellow':'red'}
+const LIGHT={green:['ok','Within calc'],yellow:['warn','Slightly over'],red:['bad','Over calc']};
+const light=(c,txt)=>`<span class="pill ${LIGHT[c][0]}"><span aria-hidden="true">●</span> ${txt||LIGHT[c][1]}</span>`;
+const pct=(q,j)=>j>0?Math.round(q/j*100)+'%':(q>0?'no calc':'–');
+function agg(rs){
+  const a={n:rs.length,q:0,oth:0,j:0,act:0,actKnown:0,ppl:0,green:0,yellow:0,red:0,pend:0,reasons:{},appr:[]};
+  for(const r of rs){
+    if(r.type==='other')a.oth+=+r.requestedTotal||0;else a.q+=+r.requestedTotal||0;a.j+=+r.justifiedTotal||0;a.ppl+=r.lines.length;a[reqColor(r)]++;
+    if(r.status==='pending')a.pend++;
+    if(reqColor(r)!=='green'){const k=r.reason||'No reason given';a.reasons[k]=(a.reasons[k]||0)+1}
+    for(const l of r.lines){const x=lineActual(r,l);if(x!=null){a.act+=x;a.actKnown++}}
+    const sub=(r.history||[]).find(h=>h.action==='Submitted'),ok=(r.history||[]).find(h=>/Division manager (approved|rejected)/.test(h.action));
+    if(sub&&ok)a.appr.push((new Date(ok.at)-new Date(sub.at))/36e5);
+  }
+  return a;
+}
+const lightCounts=a=>`${a.green?`<span class="pill ok">● ${a.green}</span> `:''}${a.yellow?`<span class="pill warn">● ${a.yellow}</span> `:''}${a.red?`<span class="pill bad">● ${a.red}</span>`:''}`;
+
+/* ===== Division manager: KPI view, names only on demand ===== */
+function vApprove(){
+  const all=Object.values(S.requests).filter(r=>r.status!=='rejected'&&inMyDiv(r));
+  const pendDates=[...new Set(all.filter(r=>r.status==='pending').map(r=>r.date))].sort();
+  if(!V.divDate)V.divDate=pendDates[0]||todayStr();
+  const d=V.divDate,rs=all.filter(r=>r.date===d),A=agg(rs);
+  const byDept={};rs.forEach(r=>(byDept[r.dept]=byDept[r.dept]||[]).push(r));
+  const rows=Object.entries(byDept).map(([id,x])=>({D:dept(id),id,a:agg(x),x})).sort((p,q)=>(q.a.q+q.a.oth-q.a.j)-(p.a.q+p.a.oth-p.a.j));
+  const attention=rs.filter(r=>reqColor(r)!=='green').sort((a,b)=>({red:0,yellow:1}[reqColor(a)]-{red:0,yellow:1}[reqColor(b)]));
+  const pendGreen=rs.filter(r=>r.status==='pending'&&reqColor(r)==='green');
+  return `<div><h2>Approvals${V.myDiv?' · '+esc(V.myDiv):''}</h2><p class="muted">OT requested against the planner's calculation. Green = within, yellow = up to ${Math.round(tol()*100)}% over or not calculated, red = more over or no plan.</p></div>
+  <div class="card"><div class="row"><label class="f grow">Date<input type="date" id="divd" data-bind="divdate" value="${d}"></label></div>
+  ${pendDates.length?`<div class="chips"><span class="small muted" style="align-self:center">Waiting:</span>${pendDates.map(w=>`<button class="chip" data-act="divdate" data-v="${w}" aria-pressed="${w===d}">${fmtDate(w)}</button>`).join('')}</div>`:''}</div>
+  <div class="kpis"><div class="kpi"><span>Requested</span><b>${fmt(A.q)} h</b></div><div class="kpi"><span>Calculated</span><b>${fmt(A.j)} h</b></div>
+   <div class="kpi"><span>% of calculation</span><b>${pct(A.q,A.j)}</b>${light(aggColor(A))}</div><div class="kpi"><span>Requests</span><b>${A.n}</b>${lightCounts(A)}</div><div class="kpi"><span>Other OT (no calc)</span><b>${fmt(A.oth)} h</b></div></div>
+  <div class="card"><h3>By department</h3>${rows.length?`<div class="tablewrap"><table><thead><tr><th>Department</th><th class="r">People</th><th class="r">Requested h</th><th class="r">Calc h</th><th class="r">%</th><th class="r">Other h</th><th>Status</th><th></th></tr></thead><tbody>
+   ${rows.map(r=>{const pend=r.x.filter(x=>x.status==='pending').length;return `<tr><td>${esc(r.id)} ${esc(r.D?.name||'')}</td><td class="r num">${r.a.ppl}</td><td class="r num">${fmt(r.a.q)}</td><td class="r num">${fmt(r.a.j)}</td><td class="r num">${pct(r.a.q,r.a.j)}</td><td class="r num">${r.a.oth?fmt(r.a.oth):''}</td><td>${lightCounts(r.a)}</td>
+     <td>${pend?`<button class="btn sm ok" data-act="divdept" data-v="${esc(r.id)}">Approve ${pend}</button>`:'<span class="small muted">Done</span>'}</td></tr>`}).join('')}
+   </tbody></table></div>`:`<div class="empty">No requests for this date.</div>`}
+   ${pendGreen.length?`<div class="row"><button class="btn ok" data-act="approvegreen">Approve all ${pendGreen.length} green</button></div>`:''}</div>
+  <div class="card"><h3>Needs attention (${attention.length})</h3><p class="small muted">Requests above the calculation, with the manager's reason. Names are hidden; open a request to see them.</p>
+  ${attention.length?attention.map(r=>{const c=reqColor(r),M=r.machine?machine(r.machine):null;return `<div style="border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:6px">
+    <div class="reqhead"><b style="margin-right:auto">${esc(r.dept)} ${esc(dept(r.dept)?.name||'')} · ${TYPE[r.type]}${M?' · '+esc(M.name):''}</b>${light(c,pct(r.requestedTotal,r.justifiedTotal))}${statusPill(r)}</div>
+    <div class="small">${r.lines.length} people · requested <b class="num">${fmt(r.requestedTotal)} h</b> · calculated <b class="num">${r.justifiedPer==null?'none':fmt(r.justifiedTotal)+' h'}</b> · ${esc(shift(r.shift)?.name||r.shift)}</div>
+    <div class="small"><b>Reason:</b> ${esc(r.reason||'No reason given')}${r.note?` · ${esc(r.note)}`:''}</div>
+    <details><summary class="small muted" style="cursor:pointer">Show names</summary><div class="lines small" style="margin-top:4px">${r.lines.map(l=>`<div>${esc(empName(l.emp))} · ${fmt(l.hours)} h${l.task?' · '+esc(l.task):''}</div>`).join('')}</div></details>
+    ${r.status==='pending'?`<div class="row"><input class="grow" id="n-${esc(r.id)}" placeholder="Comment (optional)" aria-label="Comment"><button class="btn sm ok" data-act="divok" data-id="${esc(r.id)}">Approve</button><button class="btn sm" data-act="divback" data-id="${esc(r.id)}">Send back</button><button class="btn sm bad" data-act="divno" data-id="${esc(r.id)}">Reject</button></div>`:''}</div>`}).join(''):`<div class="empty">Every request is within the calculation.</div>`}
+  </div>`;
+}
+
+/* ===== Plant manager: division dashboard ===== */
+function vDash(){
+  const c=cfg(),rs=Object.values(S.requests).filter(r=>r.status!=='rejected'&&r.date>=V.dFrom&&r.date<=V.dTo);
+  const A=agg(rs);
+  const divs=[...new Set(c.depts.map(d=>d.division).filter(Boolean))];
+  const byDiv=divs.map(dv=>({dv,x:rs.filter(r=>dept(r.dept)?.division===dv)})).filter(o=>o.x.length).map(o=>({...o,a:agg(o.x)})).sort((p,q)=>(q.a.q-q.a.j)-(p.a.q-p.a.j));
+  const allPend=Object.values(S.requests).filter(r=>r.status==='pending');
+  const oldest=allPend.map(r=>new Date(r.createdAt)).sort((a,b)=>a-b)[0];
+  const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+  // daily trend
+  const days=[];for(let d=V.dFrom;d<=V.dTo&&days.length<62;d=addDays(d,1))days.push(d);
+  const daily=days.map(d=>{const x=agg(rs.filter(r=>r.date===d));return {d,q:x.q,j:x.j}});
+  const mx=Math.max(1,...daily.flatMap(x=>[x.q,x.j]));
+  const reasons=Object.entries(A.reasons).sort((a,b)=>b[1]-a[1]);
+  const sel=V.dashDiv&&byDiv.find(o=>o.dv===V.dashDiv);
+  let drill='';
+  if(sel){const byDept={};sel.x.forEach(r=>(byDept[r.dept]=byDept[r.dept]||[]).push(r));
+    drill=`<div class="card"><div class="reqhead"><h3 style="margin-right:auto">${esc(sel.dv)} by department</h3><button class="btn sm" data-act="dashdiv" data-v="">Close</button></div><div class="tablewrap"><table><thead><tr><th>Department</th><th class="r">Requests</th><th>Lights</th><th class="r">Requested h</th><th class="r">Calc h</th><th class="r">%</th><th class="r">Other h</th><th class="r">Actual h</th><th>Top reason</th></tr></thead><tbody>
+    ${Object.entries(byDept).map(([id,x])=>({id,a:agg(x)})).sort((p,q)=>(q.a.q-q.a.j)-(p.a.q-p.a.j)).map(o=>{const tr=Object.entries(o.a.reasons).sort((a,b)=>b[1]-a[1])[0];return `<tr><td>${esc(o.id)} ${esc(dept(o.id)?.name||'')}</td><td class="r num">${o.a.n}</td><td>${lightCounts(o.a)}</td><td class="r num">${fmt(o.a.q)}</td><td class="r num">${fmt(o.a.j)}</td><td class="r">${light(aggColor(o.a),pct(o.a.q,o.a.j))}</td><td class="r num">${o.a.oth?fmt(o.a.oth):''}</td><td class="r num">${o.a.actKnown?fmt(o.a.act):'–'}</td><td class="small">${tr?esc(tr[0])+' ('+tr[1]+')':''}</td></tr>`}).join('')}
+    </tbody></table></div></div>`}
+  return `<div><h2>Plant dashboard</h2><p class="muted">How each division controls OT against the planner's calculation, and how fast division managers approve.</p></div>
+  <div class="card"><div class="row"><label class="f grow">From<input type="date" id="dfr" data-bind="dfrom" value="${V.dFrom}"></label><label class="f grow">To<input type="date" id="dto" data-bind="dto" value="${V.dTo}"></label></div></div>
+  <div class="kpis">
+   <div class="kpi"><span>Requested OT (calculated types)</span><b>${fmt(A.q)} h</b></div>
+   <div class="kpi"><span>Calculated OT</span><b>${fmt(A.j)} h</b></div>
+   <div class="kpi"><span>% of calculation</span><b>${pct(A.q,A.j)}</b>${light(aggColor(A))}</div>
+   <div class="kpi"><span>Other OT (no calc)</span><b>${fmt(A.oth)} h</b></div>
+   <div class="kpi"><span>Requests over calc</span><b>${A.yellow+A.red}/${A.n}</b>${lightCounts(A)}</div>
+   <div class="kpi"><span>Waiting at division</span><b>${allPend.length}</b>${oldest?`<span class="small muted">oldest ${fmt((Date.now()-oldest)/36e5,0)} h ago</span>`:''}</div>
+   <div class="kpi"><span>Avg approval time</span><b>${A.appr.length?fmt(avg(A.appr),1)+' h':'–'}</b></div>
+  </div>
+  <div class="card"><h3>Divisions</h3>${byDiv.length?`<div class="tablewrap"><table><thead><tr><th>Division</th><th class="r">Requests</th><th>Lights</th><th class="r">Requested h</th><th class="r">Calc h</th><th class="r">%</th><th class="r">Other h</th><th class="r">Actual h</th><th class="r">Waiting</th><th class="r">Approval time</th><th></th></tr></thead><tbody>
+   ${byDiv.map(o=>`<tr><td><b>${esc(o.dv)}</b></td><td class="r num">${o.a.n}</td><td>${lightCounts(o.a)}</td><td class="r num">${fmt(o.a.q)}</td><td class="r num">${fmt(o.a.j)}</td><td class="r">${light(aggColor(o.a),pct(o.a.q,o.a.j))}</td><td class="r num">${o.a.oth?fmt(o.a.oth):''}</td><td class="r num">${o.a.actKnown?fmt(o.a.act):'–'}</td><td class="r num">${o.a.pend||''}</td><td class="r num">${o.a.appr.length?fmt(avg(o.a.appr),1)+' h':'–'}</td><td><button class="btn sm" data-act="dashdiv" data-v="${esc(o.dv)}">Departments</button></td></tr>`).join('')}
+   </tbody></table></div>`:`<div class="empty">No OT requests in this period.</div>`}</div>
+  ${drill}
+  <div class="split">
+   <div class="card"><h3>Daily requested vs calculated</h3><div class="legend"><span style="--c:var(--bar-1)">Calculated</span><span style="--c:var(--bar-3)">Requested</span></div>
+    <div class="bars">${daily.filter(x=>x.q||x.j).map(x=>`<div class="bargroup" style="grid-template-columns:90px 1fr"><div class="lbl" style="grid-row:span 2;font-size:13px">${fmtDate(x.d)}</div><div class="track"><i style="width:${(x.j/mx*100).toFixed(1)}%;background:var(--bar-1)"></i><em>${fmt(x.j)}</em></div><div class="track"><i style="width:${(x.q/mx*100).toFixed(1)}%;background:var(--${ratioColor(x.q,x.j)==='green'?'bar-3':ratioColor(x.q,x.j)==='yellow'?'warn':'bad'})"></i><em>${fmt(x.q)}</em></div></div>`).join('')||'<p class="muted small">No requests in this period.</p>'}</div></div>
+   <div class="card"><h3>Reasons for OT above calculation</h3>${reasons.length?`<table><tbody>${reasons.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="r num">${v}</td></tr>`).join('')}</tbody></table>`:'<p class="muted small">No requests above the calculation.</p>'}</div>
+  </div>`;
+}
+async function setStatus(id,status,action,note){
+  const r=S.requests[id];if(!r)return;
+  const n={...r,status,history:hist(r,action,note)};
+  try{await put('requests',id,n)}catch(e){toast('Could not update: '+(e.message||e.code))}
+}
+
+/* ============ Plant daily approval ============ */
+function vDaily(){
+  const all=Object.values(S.requests);
+  const waiting=[...new Set(all.filter(r=>r.status==='div_approved').map(r=>r.date))].sort();
+  if(!V.dailyDate)V.dailyDate=waiting[0]||todayStr();
+  const d=V.dailyDate,di=dayInfo(d),rs=all.filter(r=>r.date===d&&r.status!=='rejected');
+  const c=cfg();
+  const rows=c.depts.map(D=>{
+    const x=rs.filter(r=>r.dept===D.id);if(!x.length)return null;
+    const plans=Object.values(S.plans).filter(p=>p.date===d&&p.dept===D.id&&+p.qty>0);
+    const sum=k=>x.reduce((a,r)=>a+(+r[k]||0),0);
+    const ppl=x.reduce((a,r)=>a+r.lines.length,0);
+    return {D,plan:plans.length,j:sum('justifiedTotal'),req:sum('requestedTotal'),ppl,over:x.filter(r=>r.over).length,pend:x.filter(r=>r.status==='pending').length,ready:x.filter(r=>r.status==='div_approved').length,done:x.filter(r=>r.status==='approved').length};
+  }).filter(Boolean);
+  const T=k=>rows.reduce((a,r)=>a+r[k],0);
+  const ready=rs.filter(r=>r.status==='div_approved').length,pend=rs.filter(r=>r.status==='pending').length;
+  const dayDoc=S.days[d];
+  return `<div><h2>Daily approval</h2><p class="muted">Review the whole day for all departments, then approve it in one step.</p></div>
+  <div class="card"><div class="row"><label class="f grow">Date<input type="date" id="dd" data-bind="dailydate" value="${d}"></label></div>
+  ${waiting.length?`<div class="chips"><span class="small muted" style="align-self:center">Waiting:</span>${waiting.map(w=>`<button class="chip" data-act="ddate" data-v="${w}" aria-pressed="${w===d}">${fmtDate(w)}</button>`).join('')}</div>`:''}
+  <p class="small muted">${di.label} · OT at ${di.mult}×${dayDoc?` · last approved ${new Date(dayDoc.at).toLocaleString(undefined,{dateStyle:'short',timeStyle:'short'})} by ${esc(dayDoc.by&&nameCache[dayDoc.by]||'Plant manager')}`:''}</p>
+  ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Department</th><th class="r">Planned runs</th><th class="r">Justified h</th><th class="r">Requested h</th><th class="r">Gap</th><th class="r">People</th><th>Status</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr><td>${esc(r.D.name)}</td><td class="r num">${r.plan||'–'}</td><td class="r num">${fmt(r.j)}</td><td class="r num">${fmt(r.req)}</td><td class="r num">${r.req-r.j>0?'<span class="pill warn">+'+fmt(r.req-r.j)+'</span>':'0'}</td><td class="r num">${r.ppl}</td>
+    <td>${r.pend?`<span class="pill warn">${r.pend} at division</span> `:''}${r.ready?`<span class="pill acc">${r.ready} ready</span> `:''}${r.done?`<span class="pill ok">${r.done} approved</span>`:''}</td></tr>`).join('')}
+  </tbody><tfoot><tr><td>Total</td><td></td><td class="r num">${fmt(T('j'))}</td><td class="r num">${fmt(T('req'))}</td><td class="r num">${fmt(T('req')-T('j'))}</td><td class="r num">${T('ppl')}</td><td></td></tr></tfoot></table></div>
+  <p class="small muted">Pay-equivalent hours for this day: <b class="num">${fmt(T('req')*di.mult)}</b> (${fmt(T('req'))} h × ${di.mult}).</p>`:`<div class="empty">No requests for this date.</div>`}
+  ${pend?`<div class="note warn small">${pend} request${pend>1?'s are':' is'} still with the division manager and won't be included.</div>`:''}
+  ${ready?`<div class="row"><input class="grow" id="pnote" placeholder="Comment (optional)" aria-label="Comment"><button class="btn ok" data-act="plantok">Approve day (${ready})</button><button class="btn bad" data-act="plantback">Send back</button></div>`:''}
+  </div>
+  ${rs.filter(r=>r.over).length?`<h3>Requests above the calculation</h3>`+rs.filter(r=>r.over).map(r=>reqCard(r)).join(''):''}`;
+}
+async function plantDecide(ok){
+  const d=V.dailyDate,note=$('#pnote')?.value||'';
+  const rs=Object.values(S.requests).filter(r=>r.date===d&&r.status==='div_approved');
+  try{
+    for(const r of rs){await put('requests',r.id,{...r,status:ok?'approved':'pending',history:hist(r,ok?'Plant manager approved':'Plant manager sent back',note)})}
+    if(ok)await put('days',d,{date:d,at:new Date().toISOString(),by:me.id||null,count:rs.length,note});
+    toast(ok?`Approved ${rs.length} requests`:`Sent ${rs.length} requests back`);
+  }catch(e){toast('Could not save: '+(e.message||e.code))}
+}
+
+/* ============ Actual hours ============ */
+function vActual(){
+  const D=dept(myDept);if(!D)return '';
+  const rs=Object.values(S.requests).filter(r=>r.dept===myDept&&(r.status==='approved'||r.status==='div_approved'));
+  const slots={};rs.filter(r=>r.type==='production'||r.type==='management').forEach(r=>{const k=r.date+'_'+r.shift;(slots[k]=slots[k]||{date:r.date,shift:r.shift,rs:[]}).rs.push(r)});
+  const keys=Object.keys(slots).sort().reverse();
+  const reps=rs.filter(r=>r.type==='replacement'||r.type==='other').sort((a,b)=>b.date.localeCompare(a.date));
+  const slotHtml=keys.map(k=>{const s=slots[k],di=dayInfo(s.date);
+    const mids=new Set(s.rs.filter(r=>r.type==='production').map(r=>r.machine));
+    if(s.rs.some(r=>r.type==='management')){const planned=machinesUnder(myDept).filter(m=>S.plans[pk(s.date,s.shift,m.id)]);(planned.length?planned:machinesUnder(myDept)).forEach(m=>mids.add(m.id))}
+    const missing=[...mids].filter(id=>!S.actuals[pk(s.date,s.shift,id)]).length;
+    const rowsH=[...mids].map(id=>{const m=machine(id);if(!m)return '';const ak=pk(s.date,s.shift,id),a=S.actuals[ak],j=justified(s.date,s.shift,id);
+      const appr=Math.max(0,...s.rs.filter(r=>r.machine===id).flatMap(r=>r.lines.map(l=>l.hours)));
+      const preview=a?Math.max(0,rnd(+a.run-di.normal)):null;
+      return `<div class="row" style="border-top:1px solid var(--line);padding-top:10px"><div class="grow"><b>${esc(m.name)}</b><div class="small muted">Planned run ${j?fmt(di.normal+j.ot)+' h':'–'}${appr?` · approved OT ${fmt(appr)} h/person`:''}${a?` · actual OT <b class="num">${fmt(preview)} h</b>`:''}${a&&appr&&preview>appr?' <span class="pill warn">above approved</span>':''}</div></div>
+        <label class="f" style="width:130px">Run hours<input type="number" step="0.5" min="0" inputmode="decimal" id="act-${esc(ak)}" value="${a?esc(a.run):''}" placeholder="${fmt(di.normal+(j?j.ot:0))}"></label>
+        <button class="btn primary" data-act="saveact" data-k="${esc(ak)}">Save</button></div>`}).join('');
+    return `<div class="card"><div class="reqhead"><h3>${fmtDate(s.date)} · ${esc(shift(s.shift)?.name||s.shift)}</h3>${missing?`<span class="pill warn">${missing} missing</span>`:'<span class="pill ok">Entered</span>'}</div>
+    <p class="small muted">${s.rs.reduce((x,r)=>x+r.lines.length,0)} people on ${s.rs.length} request${s.rs.length>1?'s':''}. Management staff get the actual OT of the longest-running machine.</p>${rowsH}</div>`}).join('');
+  const repHtml=reps.map(r=>r.lines.map((l,i)=>`<div class="card"><div class="reqhead"><h3>${esc(empName(l.emp))}</h3>${l.worked===true?'<span class="pill ok">Worked</span>':l.worked===false?'<span class="pill bad">Did not work</span>':'<span class="pill warn">Missing</span>'}</div>
+    <p class="small muted">${fmtDate(r.date)} · ${esc(shift(r.shift)?.name||'')} · ${r.type==='other'?'other OT':'replacing '+esc(empName(l.absent))} · ${fmt(l.hours)} h</p>
+    <div class="row"><button class="btn sm ok" data-act="worked" data-id="${esc(r.id)}" data-i="${i}" data-v="1">Worked</button><button class="btn sm bad" data-act="worked" data-id="${esc(r.id)}" data-i="${i}" data-v="0">Did not work</button></div></div>`).join('')).join('');
+  return `<div><h2>Actual hours · ${esc(D.name)}</h2><p class="muted">After the shift, enter how many hours each machine actually ran. Everyone on that machine's approved request gets the same actual OT: run hours − normal hours, rounded to 0.5 h.</p></div>
+  ${slotHtml||`<div class="card empty">No approved production or management OT to confirm.</div>`}
+  ${reps.length?`<h3>Replacement and other OT</h3>`+repHtml:''}`;
+}
+
+/* ============ Payroll ============ */
+/* ============ Attendance (fingerprint scans) ============ */
+const dayNum=iso=>{const [y,m,d]=iso.split('-').map(Number);return Date.UTC(y,m-1,d)/864e5};
+const isoOf=n=>new Date(n*864e5).toISOString().slice(0,10);
+const toMin=t=>{if(!t)return null;const [h,m]=String(t).split(':').map(Number);return h*60+(m||0)};
+const hhmm=m=>String(Math.floor(((m%1440)+1440)%1440/60)).padStart(2,'0')+':'+String(((m%60)+60)%60).padStart(2,'0');
+const floorHalf=h=>Math.floor(h*2+1e-9)/2;
+/* Scans of one employee as absolute minutes, from the uploaded days around a date. */
+function scansAround(empId,baseIso){
+  const out=[];const b=dayNum(baseIso);
+  for(let k=-1;k<=1;k++){const d=isoOf(b+k),doc=S.attendance[d];if(!doc)continue;for(const t of (doc.scans?.[empId]||[]))out.push((b+k)*1440+toMin(t))}
+  return out.sort((a,b)=>a-b);
+}
+/* Check one OT line against the scans.
+   The OT window starts at the line's start time; for a night shift, a start before the shift start is on the next day.
+   Covered from the start if there is a scan up to 12 h before (plus grace); covered to the end if there is a scan up to 4 h after (minus grace).
+   Otherwise the covered part is cut at the first/last scan inside the window. Result is rounded down to 0.5 h. */
+function verifyLine(r,l){
+  const target=lineActual(r,l)??+l.hours;
+  const sh=shift(r.shift),crosses=sh&&toMin(sh.end)<toMin(sh.start);
+  let base=dayNum(r.date);const st=toMin(l.start)??toMin(defaultStart(r.date,r.shift));
+  if(crosses&&st<toMin(sh.start))base+=1;
+  const baseIso=isoOf(base);
+  if(!S.attendance[baseIso])return {status:'nodata',verified:null,target};
+  const s0=base*1440+st,e0=s0+Math.round(+l.hours*60),g=+cfg().attGrace||10;
+  const sc=scansAround(l.emp,baseIso);
+  const near=sc.filter(x=>x>=s0-720&&x<=e0+240);
+  if(!near.length)return {status:'noscan',verified:0,target,scans:[]};
+  const inOk=sc.some(x=>x>=s0-720&&x<=s0+g),outOk=sc.some(x=>x>=e0-g&&x<=e0+240);
+  const inside=sc.filter(x=>x>s0&&x<e0);
+  const cs=inOk?s0:(inside[0]??null),ce=outOk?e0:(inside.length?inside[inside.length-1]:null);
+  const cov=cs!=null&&ce!=null&&ce>cs?floorHalf((ce-cs)/60):0;
+  const verified=Math.min(cov,target);
+  return {status:verified>=target-1e-9?'ok':verified>0?'short':'left',verified,target,scans:near.map(x=>hhmm(x)),first:near[0],last:near[near.length-1]};
+}
+const VSTAT={ok:['ok','Matches scan'],short:['warn','Left early'],left:['bad','Left before OT'],noscan:['bad','No scan'],nodata:['','Not uploaded']};
+
+/* ============ Payroll ============ */
+function payrollRows(from,to){
+  const rows={},pending=[];let notChecked=0;
+  const basis=V.payBasis||'verified';
+  for(const r of Object.values(S.requests)){
+    if(r.status!=='approved'||r.date<from||r.date>to)continue;
+    for(const l of r.lines){
+      const a=lineActual(r,l),e=emp(l.emp);
+      const row=rows[l.emp]=rows[l.emp]||{id:l.emp,code:l.emp,name:e?.name||'(removed staff)',crew:e?.crew||'',dept:dept(e?.dept)?.name||'',pos:e?.position||'',h15:0,h2:0,other:{},pend:0,act:0,cut:0,unchk:0};
+      if(a==null){row.pend+=l.hours;pending.push(r.id);continue}
+      row.act+=a;
+      let h=a;const v=verifyLine(r,l);
+      if(v.status==='nodata'){row.unchk+=a;notChecked++}
+      else if(basis==='verified'){h=v.verified;row.cut+=a-v.verified}
+      const m=+r.mult;if(m===1.5)row.h15+=h;else if(m===2)row.h2+=h;else row.other[m]=(row.other[m]||0)+h;
+    }
+  }
+  return {rows:Object.values(rows).sort((a,b)=>a.dept.localeCompare(b.dept)||a.name.localeCompare(b.name)),pending:[...new Set(pending)].length,notChecked};
+}
+function vPayroll(){
+  const {rows,pending,notChecked}=payrollRows(V.from,V.to);
+  const T=k=>rows.reduce((a,r)=>a+r[k],0);const basis=V.payBasis||'verified';
+  return `<div><h2>Payroll summary</h2><p class="muted">Approved OT by employee for the payroll period. Hours are checked against the fingerprint scans where they have been uploaded.</p></div>
+  <div class="card"><div class="row"><label class="f grow">From<input type="date" id="pf" data-bind="pfrom" value="${V.from}"></label><label class="f grow">To<input type="date" id="pt" data-bind="pto" value="${V.to}"></label>
+    <label class="f grow">Pay on<select id="pbasis" data-bind="pbasis"><option value="verified"${basis==='verified'?' selected':''}>Hours confirmed by scan</option><option value="actual"${basis==='actual'?' selected':''}>Actual hours from managers</option></select></label>
+    <button class="btn primary" data-act="csv" ${rows.length?'':'disabled'}>Download CSV</button></div>
+  ${pending?`<div class="note warn small">${pending} approved request${pending>1?'s are':' is'} missing actual hours. Those hours show in <b>Waiting for actual</b> and are not in the totals.</div>`:''}
+  ${notChecked?`<div class="note warn small">${notChecked} OT line${notChecked>1?'s have':' has'} no scan data uploaded for that day, so manager hours are used for them (column <b>Not scan-checked</b>). Upload the scans in <b>Attendance check</b>.</div>`:''}
+  ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Employee</th><th>Shift</th><th>Department</th><th class="r">Actual h</th><th class="r">Cut by scan</th><th class="r">OT 1.5×</th><th class="r">OT 2×</th><th class="r">Pay-equiv h</th><th class="r">Not scan-checked</th><th class="r">Waiting for actual</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr><td>${esc(r.name)}<div class="small muted">${esc(r.code)} · ${esc(r.pos)}</div></td><td>${esc(r.crew)}</td><td>${esc(r.dept)}</td><td class="r num">${fmt(r.act)}</td><td class="r num">${r.cut?'<span class="pill warn">−'+fmt(r.cut)+'</span>':''}</td><td class="r num">${fmt(r.h15)}</td><td class="r num">${fmt(r.h2)}</td><td class="r num">${fmt(r.h15*1.5+r.h2*2)}</td><td class="r num">${r.unchk?fmt(r.unchk):''}</td><td class="r num">${r.pend?fmt(r.pend):''}</td></tr>`).join('')}
+  </tbody><tfoot><tr><td>Total · ${rows.length} people</td><td></td><td></td><td class="r num">${fmt(T('act'))}</td><td class="r num">${T('cut')?'−'+fmt(T('cut')):''}</td><td class="r num">${fmt(T('h15'))}</td><td class="r num">${fmt(T('h2'))}</td><td class="r num">${fmt(T('h15')*1.5+T('h2')*2)}</td><td class="r num">${fmt(T('unchk'))}</td><td class="r num">${fmt(T('pend'))}</td></tr></tfoot></table></div>`:`<div class="empty">No approved OT in this period.</div>`}
+  ${V.csv?`<label class="f">CSV (copy into Excel)<textarea id="csvout" readonly>${esc(V.csv)}</textarea></label><div class="row"><button class="btn sm" data-act="copycsv">Copy CSV</button></div>`:''}
+  </div>`;
+}
+async function doCsv(){
+  const {rows}=payrollRows(V.from,V.to);
+  const q=s=>`"${String(s).replace(/"/g,'""')}"`;
+  const csv=['Employee ID,Employee,Shift,Department,Position,Actual hours (manager),Cut by scan,OT 1.5x hours,OT 2x hours,Pay-equivalent hours,Not scan-checked hours,Waiting for actual']
+    .concat(rows.map(r=>[q(r.code),q(r.name),q(r.crew),q(r.dept),q(r.pos),r.act,r.cut,r.h15,r.h2,r.h15*1.5+r.h2*2,r.unchk,r.pend].join(','))).join('\n');
+  const fn=`OT_${V.from}_to_${V.to}.csv`;
+  try{const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('CSV downloaded');return}catch(e){}
+  V.csv=csv;render();
+}
+
+/* ============ File reading (xlsx / csv) ============ */
+const cellStr=v=>v==null?'':String(v).trim();
+function parseNum(v){if(typeof v==='number')return v;const n=parseFloat(cellStr(v).replace(/,/g,''));return isFinite(n)?n:null}
+const TH_MONTHS=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const TH_MON_SHORT=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+function fixYear(y){y=+y;if(y<100)y+=2000;if(y>2400)y-=543;return y}
+function mkIso(y,m,d){if(!(m>=1&&m<=12&&d>=1&&d<=31))return null;return y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+function parseDateAny(v){
+  if(typeof v==='number'&&v>20000&&v<80000)return isoOf(Math.floor(v)-25569);
+  const s=cellStr(v);if(!s)return null;let m;
+  if((m=s.match(/^(\d{4})(\d{2})(\d{2})$/)))return mkIso(fixYear(m[1]),+m[2],+m[3]);
+  if((m=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/)))return mkIso(fixYear(m[1]),+m[2],+m[3]);
+  if((m=s.match(/(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/)))return mkIso(fixYear(m[3]),+m[2],+m[1]);
+  for(let i=0;i<12;i++){if(s.includes(TH_MONTHS[i])||s.includes(TH_MON_SHORT[i])){const d=s.match(/(\d{1,2})\s*(?:[^\d\s]+)\s*(\d{4})/);if(d)return mkIso(fixYear(d[2]),i+1,+d[1])}}
+  return null;
+}
+function parseTimeAny(v){
+  if(typeof v==='number'){const f=v%1;if(f>0||v<1){const mm=Math.round(f*1440);return hhmm(mm)}return null}
+  const s=cellStr(v);const m=s.match(/^(\d{1,2})(\d{2})$/)||s.match(/(\d{1,2})[:.](\d{2})(?![\d\/.\-]*\d{4})/);if(!m)return null;const h=+m[1],mi=+m[2];if(h>23||mi>59)return null;return hhmm(h*60+mi);
+}
+async function readTable(file,prefer){
+  if(!window.XLSX)throw new Error('The file reader did not load. Check the connection and reload the page.');
+  const buf=await file.arrayBuffer();let wb;
+  if(/\.(csv|txt)$/i.test(file.name)){ /* text files: UTF-8, or Thai Windows encoding from older scanner software; keep every value as text */
+    let txt;try{txt=new TextDecoder('utf-8',{fatal:true}).decode(buf)}catch(e){txt=new TextDecoder('windows-874').decode(buf)}
+    const lines=txt.replace(/^\uFEFF/,'').split(/\r?\n/).filter(l=>l.trim());
+    const SCAN=/^\s*(\S+)\s+(\d{8})\s+(\d{3,4})\s*$/;
+    if(lines.length&&lines.slice(0,20).every(l=>SCAN.test(l))) /* fingerprint scanner export: employee ID, date, time per line, no header */
+      return [['Employee ID','Date','Time']].concat(lines.map(l=>{const m=l.match(SCAN);return m?[m[1],m[2],m[3]]:['','','']}));
+    wb=XLSX.read(txt.replace(/^\uFEFF/,''),{type:'string',raw:true});
+  }else wb=XLSX.read(buf,{type:'array',cellDates:false});
+  const name=prefer&&wb.SheetNames.find(n=>n.toLowerCase()===String(prefer).toLowerCase());
+  const ws=wb.Sheets[name||wb.SheetNames[0]];return XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});
+}
+
+
+/* ============ Automatic plan sync from the planning workbook (Plan2026-930) ============
+   Twice a day (after 08:00 and after 17:00) the first person who opens the app with the Google Sheets connector
+   reads the department tabs for the dates around today and saves one plan per machine, date and shift.
+   Planned quantity gives the hours needed; produced quantity (filled in about 2 days later) gives the hours the output needed. */
+const PLAN_ADAPTERS=[
+  /* 172: every FBM / SBM building machine is its own line, so OT is calculated per machine. */
+  {id:'172',tab:'dataPlan-172 Radial',first:3,cols:'A:M',date:0,shift:5,mach:4,type:3,qty:8,act:[12],agg:'max',
+   map:m=>{const x=String(m).toUpperCase().replace(/\s+/g,'').match(/^(FBM|SBM)0*(\d+)$/);if(!x)return '';const id='172-'+x[1]+String(x[2]).padStart(2,'0');return machine(id)?id:''}},
+  {id:'173',tab:'173 BEAD dataPlan',first:3,cols:'A:O',date:0,shift:2,mach:3,qty:10,act:[13,14],agg:'sum',map:()=> '173-1'},
+  /* 120 tread extruders: kg = treads to produce × kg per tread, per extruder LINE (LINE2 → 120 Line 2). */
+  {id:'120',tab:'Tread dataPlan',first:3,cols:'A:Z',date:0,shift:3,mach:22,qty:20,mult:10,act:[25],agg:'max',
+   map:m=>{const n=(String(m).match(/(\d+)/)||[])[1];const x=n&&(cfg().machines||[]).find(mm=>mm.dept==='120'&&mm.name.replace(/\s+/g,'').toLowerCase()==='line'+n);return x?x.id:''}},
+  {id:'140',tab:'140-ตัด PLY (manual) dataPlan',first:3,cols:'A:S',date:0,shift:2,mach:4,qty:11,act:[18],agg:'max',
+   map:m=>{const n=(String(m).match(/(\d+)/)||[])[1];return n&&+n>=1&&+n<=5?'140-'+n:''}},
+];
+/* Shift codes in the plan: ช / เช้า = day, บ / บ่าย = night; the number is the order inside the shift. Anything else (blank, ไหล) is skipped. */
+function planShift(code){const c=cellStr(code).replace(/^กะ/,'');if(/^(ช|เช้า)/.test(c))return 'D';if(/^(บ|บ่าย)/.test(c))return 'N';return ''}
+function aggregatePlan(ad,rows,from,to){
+  const g={};
+  for(const r of rows){
+    const d=parseDateAny(r[ad.date]);if(!d||d<from||d>to)continue;
+    const sh=planShift(r[ad.shift]);if(!sh)continue;
+    const mname=cellStr(r[ad.mach]);const mid=ad.map(mname,ad.type!=null?cellStr(r[ad.type]):'');if(!mid){if(mname&&ad._unmatched)ad._unmatched.add(mname);continue}
+    const k=ad.mult!=null?(parseNum(r[ad.mult])||0):1;const q=(parseNum(r[ad.qty])||0)*k;const a=ad.act.reduce((s,c)=>s+(parseNum(r[c])||0),0)*k;const hasA=ad.act.some(c=>cellStr(r[c])!=='');
+    const key=d+'|'+sh+'|'+mid;const o=g[key]=g[key]||{date:d,shift:sh,machine:mid,per:{},anyAct:false};
+    const pm=o.per[mname]=o.per[mname]||{q:0,a:0};pm.q+=q;pm.a+=a;if(hasA)o.anyAct=true;
+  }
+  const out=[];
+  for(const o of Object.values(g)){
+    const m=machine(o.machine);if(!m||!(+m.rate>0))continue;
+    const det=Object.entries(o.per).map(([n,v])=>({m:n,q:v.q,a:v.a,h:+(v.q/m.rate).toFixed(2),ah:+(v.a/m.rate).toFixed(2)})).sort((x,y)=>y.h-x.h);
+    const Q=det.reduce((s,x)=>s+x.q,0),A=det.reduce((s,x)=>s+x.a,0);
+    const hours=ad.agg==='sum'?Q/m.rate:Math.max(0,...det.map(x=>x.h));
+    const ah=o.anyAct?(ad.agg==='sum'?A/m.rate:Math.max(0,...det.map(x=>x.ah))):null;
+    out.push({date:o.date,shift:o.shift,dept:m.dept,machine:o.machine,qty:Q,hours:+hours.toFixed(2),actualQty:o.anyAct?A:null,actualHours:ah==null?null:+ah.toFixed(2),detail:det.slice(0,40)});
+  }
+  return out;
+}
+function syncSlot(now=new Date()){const d=todayStr(),h=now.getHours();return h>=17?d+' 17:00':h>=8?d+' 08:00':addDays(d,-1)+' 17:00'}
+let syncing=false;
+/* A read past the last row of a tab is refused with "exceeds grid limits. Max rows: N"; report N so the caller can stay inside the tab. */
+async function sheetsValues(mcp,id,range){
+  let res;
+  try{res=await mcp.callTool('Google Sheets','get_values',{spreadsheetId:id,range})}
+  catch(e){const m=String((e&&e.message)||'').match(/exceeds grid limits[^]*?Max rows:\s*(\d+)/i);if(m)throw {grid:+m[1],code:'grid'};throw e}
+  let p=res&&res.payload;if(typeof p==='string'){try{p=JSON.parse(p)}catch(e){}}
+  return (p&&p.values)||[];
+}
+/* First data row on or after a date: binary search on the date column (blank rows at the end count as "after"). */
+async function findStart(mcp,id,ad,target,hint){
+  let lo=ad.first,hi=Math.max(ad.first+1,(hint&&hint.rowCount)||60000);
+  if(hint&&hint.row&&hint.date&&hint.date<=target&&hint.row<hi)lo=Math.max(lo,hint.row);
+  const col=String.fromCharCode(65+ad.date);
+  while(lo<hi){const mid=Math.floor((lo+hi)/2);let v;
+    try{v=await sheetsValues(mcp,id,`'${ad.tab}'!${col}${mid}:${col}${mid}`)}
+    catch(e){if(e&&e.grid){hi=Math.min(mid,e.grid+1);ad._rows=e.grid;continue}throw e}
+    const d=parseDateAny(v[0]&&v[0][0]);
+    if(d&&d<target)lo=mid+1;else hi=mid}
+  return lo;
+}
+async function runSync(manual){
+  if(syncing)return;const id=fileIdFrom(cfg().planFeedUrl);if(!id){if(manual)toast('Add the planning workbook link in Admin → Setup');return}
+  let mcp=null;try{mcp=window.claude&&claude.use?await claude.use('mcp'):null}catch(e){}
+  if(!mcp){if(manual)toast('Syncing needs claude.ai with the Google Sheets connector');return}
+  syncing=true;V.syncMsg='Reading the planning workbook…';render();
+  const from=addDays(todayStr(),-3),to=addDays(todayStr(),1);const state={...(S.sync||{})};const rowsHint=state.rows||{};
+  const done=[],failed=[],unmatched=[];let saved=0;
+  for(const ad of PLAN_ADAPTERS){
+    try{
+      const start=await findStart(mcp,id,ad,from,rowsHint[ad.id]);
+      const [c0,c1]=ad.cols.split(':');let r=start,rows=[];
+      for(let i=0;i<8;i++){let end=r+299;if(ad._rows){if(r>ad._rows)break;end=Math.min(end,ad._rows)}
+        let v;try{v=await sheetsValues(mcp,id,`'${ad.tab}'!${c0}${r}:${c1}${end}`)}
+        catch(e){if(e&&e.grid&&e.grid>=r){ad._rows=e.grid;v=await sheetsValues(mcp,id,`'${ad.tab}'!${c0}${r}:${c1}${e.grid}`)}else throw e}
+        rows=rows.concat(v);
+        const last=v.length?parseDateAny(v[v.length-1][ad.date]):null;if(v.length<300||!last||last>to)break;r+=300}
+      ad._unmatched=new Set();const plans=aggregatePlan(ad,rows,from,to);if(ad._unmatched.size)unmatched.push(ad.id+': '+[...ad._unmatched].slice(0,12).join(', '));
+      for(const p of plans){await put('plans',pk(p.date,p.shift,p.machine),{...p,source:'Plan2026-930 · '+ad.tab,at:new Date().toISOString(),by:me.id||null});saved++}
+      rowsHint[ad.id]={row:start,date:from,rowCount:ad._rows||null};done.push(ad.id+' ('+plans.length+')');
+    }catch(e){failed.push(ad.id+': '+((e&&(e.message||e.code))||e).toString().slice(0,140))}
+  }
+  const st={slot:syncSlot(),at:new Date().toISOString(),by:me.id||null,done,failed,unmatched,rows:rowsHint,saved};
+  try{await put('sync','state',st)}catch(e){}
+  if(mode==='local')S.sync=st;
+  syncing=false;V.syncMsg=failed.length?'Some departments could not be read: '+esc(failed.join('; ')):'';
+  if(manual)toast(failed.length?'Sync finished with problems':`Plan updated: ${saved} machine plans`);render();
+}
+function autoSync(){
+  return; /* GitHub version: the Apps Script does the sync */
+  if(syncing||mode!=='live'||!fileIdFrom(cfg().planFeedUrl))return;
+  const st=S.sync;if(st&&st.slot===syncSlot())return;
+  if(st&&st.at&&Date.now()-new Date(st.at)<5*60e3)return;
+  runSync(false);
+}
+function syncLine(){
+  const st=S.sync;const linked=fileIdFrom(cfg().planFeedUrl);
+  if(!linked)return '';
+  return `<div class="card"><div class="reqhead"><h3 style="margin-right:auto">Planning workbook</h3></div>
+   <p class="small muted">Sent by the script in the planning workbook at about 08:00 and 17:00 (Extensions → Apps Script → syncPlan can also be run by hand). ${st&&st.at?`Last update ${new Date(st.at).toLocaleString(undefined,{dateStyle:'short',timeStyle:'short'})}${st.done&&st.done.length?' · departments '+esc(st.done.join(', ')):''}.`:'Not synced yet.'} Actual output is filled in about 2 days later.</p>
+   ${V.syncMsg?`<div class="note small">${V.syncMsg}</div>`:''}${st&&st.failed&&st.failed.length?`<div class="note warn small">Not read last time: ${esc(st.failed.join('; '))}</div>`:''}${st&&st.unmatched&&st.unmatched.length?`<div class="note warn small">Machines in the plan that are not in Setup (skipped): ${esc(st.unmatched.join('; '))}</div>`:''}</div>`;
+}
+/* ============ Production plan import ============ */
+function matchMachine(deptText,machText){
+  const code=(cellStr(deptText).match(/^\s*(\d{3,4})/)||[])[1]||'';
+  const norm=x=>cellStr(x).toLowerCase().replace(/\(.*?\)/g,'').replace(/\s+/g,'');
+  const ms=cfg().machines||[],mt=norm(machText);
+  const fam=m=>code&&(m.dept===code||m.dept.slice(0,-1)===code.slice(0,-1)||m.name.includes('('+code+')'));
+  let c=mt?ms.filter(m=>fam(m)&&norm(m.name)===mt):[];if(c.length===1)return c[0].id;
+  c=mt?ms.filter(m=>norm(m.name)===mt):[];if(c.length===1)return c[0].id;
+  if(!mt&&code){c=ms.filter(m=>m.dept===code);if(c.length===1)return c[0].id}
+  return '';
+}
+/* Reads the plan sheet layout: a date in the first rows, a header row with "Plan", then one row per machine. */
+function parsePlanRows(rows){
+  let date=null;for(const r of rows.slice(0,4)){for(const c of r){const d=parseDateAny(c);if(d){date=d;break}}if(date)break}
+  let h=-1,pc=-1,dc=-1,mc=-1;
+  for(let i=0;i<Math.min(rows.length,10);i++){const r=rows[i].map(cellStr);const p=r.findIndex(x=>/^(plan|แผน|แผนผลิต|qty|quantity)$/i.test(x));if(p>=0){h=i;pc=p;dc=r.findIndex(x=>/แผนก|dept|department/i.test(x));mc=r.findIndex(x=>/เครื่อง|machine|line/i.test(x));break}}
+  if(h<0)return {error:'Could not find a column named "Plan" in the first 10 rows.'};
+  if(dc<0)dc=Math.max(0,pc-5);
+  const items=[];
+  for(const r of rows.slice(h+1)){
+    const dt=cellStr(r[dc]),mtx=mc>=0?cellStr(r[mc]):'';if(!dt&&!mtx)continue;
+    const qty=parseNum(r[pc]);
+    items.push({dept:dt,mach:mtx,qty,mid:matchMachine(dt,mtx)});
+  }
+  return {date,items};
+}
+function fileIdFrom(u){const m=cellStr(u).match(/\/d\/([A-Za-z0-9_\-]{20,})/)||cellStr(u).match(/^([A-Za-z0-9_\-]{25,})$/);return m?m[1]:''}
+async function loadLinkedPlan(){
+  const id=fileIdFrom(cfg().planSheetUrl);if(!id){toast('Add the plan sheet link in Admin → Setup first');return}
+  let mcp=null;try{mcp=window.claude&&claude.use?await claude.use('mcp'):null}catch(e){}
+  if(!mcp){V.impMsg='Loading from Google Drive works only inside claude.ai with the Google Drive connector. Use “Upload plan file” instead.';render();return}
+  V.impMsg='Loading the plan sheet from Google Drive…';render();
+  try{
+    const res=await mcp.callTool('Google Drive','download_file_content',{fileId:id,exportMimeType:'text/csv'});
+    let p=res&&res.payload;if(typeof p==='string'){try{p=JSON.parse(p)}catch(e){}}
+    const b64=p&&(p.content||p.base64Content);if(!b64)throw {code:'bad_payload',message:'The file came back empty.'};
+    const bytes=Uint8Array.from(atob(b64),ch=>ch.charCodeAt(0));const txt=new TextDecoder('utf-8').decode(bytes);
+    const wb=XLSX.read(txt,{type:'string',raw:true});const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''});
+    setImport(parsePlanRows(rows),'Google Sheet '+(p.title||''));
+  }catch(e){
+    const c=e&&e.code;
+    V.impMsg=c==='server_not_connected'?'Add the Google Drive connector in claude.ai Settings → Connectors, then try again.'
+      :c==='needs_reauth'?'Reconnect Google Drive in claude.ai Settings → Connectors, then try again.'
+      :c==='not_in_manifest'||c==='approval_required'?'Google Drive access was not allowed for this page. Allow it from the page’s Permissions menu, or upload the file instead.'
+      :c==='tool_error'?'Google Drive could not open the file. Check that your Google account can open the plan sheet link. ('+esc(e.message||'')+')'
+      :c==='server_unavailable'?'Google Drive did not answer. Try again in a minute.'
+      :'Could not load the plan sheet: '+esc((e&&e.message)||String(e));
+    render();
+  }
+}
+function setImport(res,src){
+  if(res.error){V.impMsg=res.error;V.imp=null;render();return}
+  V.imp={date:res.date||V.planDate,shift:V.planShift,items:res.items,src};V.impMsg='';render();
+}
+function importCard(){
+  const linked=fileIdFrom(cfg().planSheetUrl);
+  let html=`<div class="card"><h3>Load the plan from your plan file</h3>
+   <p class="small muted">Reads the plan sheet layout (date at the top, a “Plan” column, one row per machine). Machines are matched by department code and machine name.</p>
+   <div class="row"><label class="btn" for="planfile" style="display:inline-flex;align-items:center">Upload plan file (.xlsx / .csv)</label><input type="file" id="planfile" accept=".xlsx,.xls,.csv" hidden></div>
+   ${linked?'':'<p class="small muted">An admin can link the online plan sheet in Admin → Setup.</p>'}
+   ${V.impMsg?`<div class="note small">${V.impMsg}</div>`:''}`;
+  const I=V.imp;
+  if(I){
+    const ok=I.items.filter(x=>x.mid&&x.qty>0),bad=I.items.filter(x=>!x.mid&&x.qty>0);
+    html+=`<div class="row"><label class="f grow">Plan date<input type="date" id="impdate" data-bind="impdate" value="${I.date}"></label><label class="f grow">Shift${shiftSel('impshift',I.shift,'impshift')}</label></div>
+    <p class="small">From ${esc(I.src)}: ${ok.length} machines with a plan matched${bad.length?`, <b>${bad.length} not matched</b> (pick the machine below)`:''}.</p>
+    <div class="tablewrap"><table><thead><tr><th>In file</th><th>Machine in system</th><th class="r">Plan</th><th class="r">OT / person</th></tr></thead><tbody>
+    ${I.items.filter(x=>x.qty>0).map(x=>{const i=I.items.indexOf(x),m=machine(x.mid);const ot=m&&+m.rate>0?Math.max(0,rnd(x.qty/m.rate-dayInfo(I.date).normal)):null;
+      return `<tr><td>${esc(x.dept)}<div class="small muted">${esc(x.mach)}</div></td><td><select data-bind="impmach" data-i="${i}"><option value="">Not matched – skip</option>${(cfg().machines||[]).map(mm=>`<option value="${esc(mm.id)}"${mm.id===x.mid?' selected':''}>${esc(mm.dept)} · ${esc(mm.name)}</option>`).join('')}</select></td><td class="r num">${fmt(x.qty,0)} ${esc(m?.unit||'')}</td><td class="r num">${ot==null?'–':fmt(ot)+' h'}</td></tr>`}).join('')}
+    </tbody></table></div>
+    <div class="row"><button class="btn primary" data-act="saveimport" ${ok.length?'':'disabled'}>Save ${ok.length} plans for ${fmtDate(I.date)} · ${esc(shift(I.shift)?.name||'')}</button><button class="btn" data-act="cancelimport">Cancel</button></div>`;
+  }
+  return html+'</div>';
+}
+async function saveImport(){
+  const I=V.imp;if(!I)return;let n=0;
+  try{for(const x of I.items){if(!x.mid||!(x.qty>0))continue;const m=machine(x.mid);const k=pk(I.date,I.shift,x.mid);
+    await put('plans',k,{date:I.date,shift:I.shift,dept:m.dept,machine:x.mid,qty:+x.qty,at:new Date().toISOString(),by:me.id||null,source:I.src});n++}
+    V.planDate=I.date;V.planShift=I.shift;V.imp=null;toast(`Saved ${n} plans`);render()}
+  catch(e){toast('Could not save: '+(e.message||e.code))}
+}
+
+/* ============ Attendance upload and check ============ */
+function guessAttCols(head){
+  const h=head.map(x=>cellStr(x).toLowerCase());const f=re=>h.findIndex(x=>re.test(x));
+  return {id:f(/รหัส|emp|employee|staff|code|^id$|เลขที่/),date:f(/วันที่|date|วัน/),time:f(/^เวลา$|^time$|scan|เวลาสแกน|datetime/),tin:f(/เข้า|time ?in|^in$|check ?in/),tout:f(/ออก|time ?out|^out$|check ?out/)};
+}
+async function onAttFile(file){
+  try{const rows=await readTable(file);let h=0;
+    for(let i=0;i<Math.min(rows.length,10);i++){const g=guessAttCols(rows[i]);if(g.id>=0&&(g.date>=0||g.time>=0)){h=i;break}}
+    V.att={file:file.name,head:rows[h].map(cellStr),rows:rows.slice(h+1).filter(r=>r.some(c=>cellStr(c))),map:guessAttCols(rows[h])};V.attMsg='';render();
+  }catch(e){V.attMsg='Could not read the file: '+esc(e.message||e);render()}
+}
+function attParsed(){
+  const A=V.att;if(!A)return null;const M=A.map;const by={};let bad=0;
+  for(const r of A.rows){
+    const id=cellStr(r[M.id]);if(!id){bad++;continue}
+    const dateSrc=M.date>=0?r[M.date]:r[M.time];const d=parseDateAny(dateSrc);if(!d){bad++;continue}
+    const times=[];
+    if(M.time>=0){const t=parseTimeAny(r[M.time]);if(t)times.push(t)}
+    if(M.tin>=0){const t=parseTimeAny(r[M.tin]);if(t)times.push(t)}
+    if(M.tout>=0){let t=parseTimeAny(r[M.tout]);if(t){ /* an out time earlier than the in time is after midnight: store it on the next day */
+      if(M.tin>=0&&parseTimeAny(r[M.tin])&&toMin(t)<toMin(parseTimeAny(r[M.tin]))){const nd=isoOf(dayNum(d)+1);((by[nd]=by[nd]||{})[id]=by[nd][id]||[]).push(t);t=null}
+      if(t)times.push(t)}}
+    if(!times.length){bad++;continue}
+    const o=(by[d]=by[d]||{});o[id]=(o[id]||[]).concat(times);
+  }
+  return {by,bad};
+}
+function attCard(){
+  const A=V.att;
+  let html=`<div class="card"><h3>Upload fingerprint scans</h3>
+   <p class="small muted">The daily export from the scanner (.txt, one scan per line: employee ID, date, time), or an Excel/CSV file. Each export runs to about 08:30 the next morning; uploading the next file adds the missing scans, and duplicate scans are ignored.</p>
+   <div class="row"><label class="btn primary" for="attfile" style="display:inline-flex;align-items:center">Choose scan file</label><input type="file" id="attfile" accept=".xlsx,.xls,.csv,.txt" hidden></div>
+   ${V.attMsg?`<div class="note small">${V.attMsg}</div>`:''}`;
+  if(A){
+    const P=attParsed(),days=Object.keys(P.by).sort(),opt=k=>`<select data-bind="attmap" data-k="${k}"><option value="-1">–</option>${A.head.map((h,i)=>`<option value="${i}"${A.map[k]===i?' selected':''}>${esc(h||'Column '+(i+1))}</option>`).join('')}</select>`;
+    const known=new Set(cfg().employees.map(e=>e.id));const ids=new Set(days.flatMap(d=>Object.keys(P.by[d])));const unknown=[...ids].filter(i=>!known.has(i)).length;
+    html+=`<p class="small"><b>${esc(A.file)}</b>: ${A.rows.length} rows. Check that the columns are right:</p>
+    <div class="row"><label class="f grow">Employee ID${opt('id')}</label><label class="f grow">Date${opt('date')}</label><label class="f grow">Scan time${opt('time')}</label><label class="f grow">Time in${opt('tin')}</label><label class="f grow">Time out${opt('tout')}</label></div>
+    <div class="tablewrap"><table><thead><tr>${A.head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${A.rows.slice(0,4).map(r=>`<tr>${A.head.map((_,i)=>`<td class="small">${esc(cellStr(r[i]))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    <p class="small">${days.length?`Days found: <b>${days.length}</b> (${fmtDate(days[0])} to ${fmtDate(days[days.length-1])}) · ${ids.size} employees`:'<b>No usable rows yet.</b> Check the column choices.'}${P.bad?` · ${P.bad} rows skipped (no ID, date or time)`:''}${unknown?` · ${unknown} IDs not in the staff list`:''}</p>
+    <div class="row"><button class="btn primary" data-act="attsave" ${days.length?'':'disabled'}>Save scans for ${days.length} day${days.length===1?'':'s'}</button><button class="btn" data-act="attcancel">Cancel</button></div>`;
+  }
+  return html+'</div>';
+}
+async function attSave(){
+  const P=attParsed();if(!P)return;let n=0;
+  try{for(const [d,o] of Object.entries(P.by)){const cur=S.attendance[d]?.scans||{};const merged={...cur};
+      for(const [id,ts] of Object.entries(o))merged[id]=[...new Set([...(cur[id]||[]),...ts])].sort();
+      await put('attendance',d,{date:d,scans:merged,files:[...new Set([...(S.attendance[d]?.files||[]),V.att.file])],at:new Date().toISOString(),by:me.id||null});n++}
+    V.att=null;toast(`Saved scans for ${n} days`);render()}
+  catch(e){toast('Could not save: '+(e.message||e.code))}
+}
+function vAttend(){
+  const lines=[];
+  for(const r of Object.values(S.requests)){if(r.status!=='approved'||r.date<V.from||r.date>V.to)continue;for(const l of r.lines)lines.push({r,l,v:verifyLine(r,l)})}
+  const cnt={ok:0,short:0,left:0,noscan:0,nodata:0};lines.forEach(x=>cnt[x.v.status]++);
+  const show=lines.filter(x=>V.attFilter==='all'||x.v.status!=='ok').sort((a,b)=>a.r.date.localeCompare(b.r.date)||a.r.dept.localeCompare(b.r.dept));
+  const upDays=Object.keys(S.attendance).filter(d=>d>=V.from&&d<=V.to).length;
+  return `<div><h2>Attendance check</h2><p class="muted">Compares each approved OT line with the fingerprint scans. OT is confirmed when the person scanned in before the OT start and out after the OT end (${+cfg().attGrace||10} minutes grace). Leaving early cuts the OT to the time actually covered, rounded down to 0.5 h.</p></div>
+  ${attCard()}
+  <div class="card"><div class="row"><label class="f grow">From<input type="date" data-bind="pfrom" value="${V.from}"></label><label class="f grow">To<input type="date" data-bind="pto" value="${V.to}"></label></div>
+   <p class="small muted">Scan data uploaded for ${upDays} day${upDays===1?'':'s'} in this period.</p></div>
+  <div class="kpis"><div class="kpi"><span>Matches scan</span><b>${cnt.ok}</b></div><div class="kpi"><span>Left early</span><b>${cnt.short}</b></div><div class="kpi"><span>Left before OT</span><b>${cnt.left}</b></div><div class="kpi"><span>No scan</span><b>${cnt.noscan}</b></div><div class="kpi"><span>Not uploaded</span><b>${cnt.nodata}</b></div></div>
+  <div class="card"><div class="reqhead"><h3 style="margin-right:auto">OT lines</h3><div class="chips"><button class="chip" data-act="attfilter" data-v="issues" aria-pressed="${V.attFilter!=='all'}">Only problems</button><button class="chip" data-act="attfilter" data-v="all" aria-pressed="${V.attFilter==='all'}">All</button></div></div>
+  ${show.length?`<div class="tablewrap"><table><thead><tr><th>Date</th><th>Employee</th><th>Department</th><th>OT time</th><th class="r">Actual h</th><th>Scans</th><th class="r">Confirmed h</th><th>Result</th></tr></thead><tbody>
+  ${show.slice(0,400).map(({r,l,v})=>`<tr><td class="small">${fmtDate(r.date)}</td><td>${esc(empName(l.emp))}<div class="small muted">${esc(l.emp)}</div></td><td class="small">${esc(r.dept)}</td><td class="small num">${esc(l.start)}–${esc(l.end)}</td><td class="r num">${fmt(v.target)}</td><td class="small num">${v.scans?esc(v.scans.join(' ')):'–'}</td><td class="r num">${v.verified==null?'–':fmt(v.verified)}</td><td><span class="pill ${VSTAT[v.status][0]}">${VSTAT[v.status][1]}</span></td></tr>`).join('')}
+  </tbody></table></div>${show.length>400?`<p class="small muted">Showing the first 400 of ${show.length}.</p>`:''}`:`<div class="empty">${lines.length?'Every OT line matches the scans.':'No approved OT in this period.'}</div>`}</div>`;
+}
+
+/* ============ Statistics ============ */
+function vStats(){
+  const c=cfg(),rs=Object.values(S.requests).filter(r=>r.status!=='rejected'&&r.date>=V.sFrom&&r.date<=V.sTo);
+  const byD={},mAct={};let act=0,act2=0,rep=0,overN=0;const byType={production:0,management:0,replacement:0,other:0},reasons={},byEmp={};
+  for(const r of rs){
+    const x=byD[r.dept]=byD[r.dept]||{j:0,req:0,act:0,prodAct:0};
+    x.j+=+r.justifiedTotal||0;x.req+=+r.requestedTotal||0;if(r.over){overN++;reasons[r.reason||'No reason']=(reasons[r.reason||'No reason']||0)+1}
+    for(const l of r.lines){const a=lineActual(r,l);if(a==null)continue;x.act+=a;act+=a;if(+r.mult===2)act2+=a;byType[r.type]+=a;if(r.type==='production'){x.prodAct+=a;mAct[r.machine]=(mAct[r.machine]||0)+a}if(r.type==='replacement')rep+=a;byEmp[l.emp]=(byEmp[l.emp]||0)+a}
+  }
+  const qty={};Object.values(S.plans).forEach(p=>{if(p.date>=V.sFrom&&p.date<=V.sTo&&p.machine)qty[p.machine]=(qty[p.machine]||0)+ +p.qty});
+  const ds=c.depts.filter(D=>byD[D.id]);
+  const mx=Math.max(1,...ds.flatMap(D=>[byD[D.id].j,byD[D.id].req,byD[D.id].act]));
+  const bar=(v,col)=>`<div class="track"><i style="width:${(v/mx*100).toFixed(1)}%;background:var(${col})"></i><em>${fmt(v)}</em></div>`;
+  const tMax=Math.max(1,...Object.values(byType));
+  const top=Object.entries(byEmp).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  return `<div><h2>Statistics</h2><p class="muted">Approved and pending OT, rejected requests excluded. Actual hours count only where managers have entered them.</p></div>
+  <div class="card"><div class="row"><label class="f grow">From<input type="date" id="sf" data-bind="sfrom" value="${V.sFrom}"></label><label class="f grow">To<input type="date" id="st" data-bind="sto" value="${V.sTo}"></label></div></div>
+  <div class="kpis"><div class="kpi"><span>Actual OT hours</span><b>${fmt(act)}</b></div><div class="kpi"><span>Of which at 2×</span><b>${fmt(act2)}</b></div><div class="kpi"><span>Replacement OT h</span><b>${fmt(rep)}</b></div><div class="kpi"><span>Requests above calc</span><b>${overN}/${rs.length}</b></div></div>
+  <div class="card"><h3>Justified vs requested vs actual, by department</h3>
+  <div class="legend"><span style="--c:var(--bar-1)">Justified</span><span style="--c:var(--bar-2)">Requested</span><span style="--c:var(--bar-3)">Actual</span></div>
+  ${ds.length?`<div class="bars">${ds.map(D=>`<div class="bargroup"><div class="lbl">${esc(D.name)}</div>${bar(byD[D.id].j,'--bar-1')}${bar(byD[D.id].req,'--bar-2')}${bar(byD[D.id].act,'--bar-3')}</div>`).join('')}</div>`:`<div class="empty">No OT in this period.</div>`}</div>
+  <div class="split">
+   <div class="card"><h3>Production OT per 1,000 units</h3><p class="small muted">Actual production OT hours ÷ planned quantity × 1,000. Lower is better.</p>
+    <div class="tablewrap"><table><thead><tr><th>Machine</th><th class="r">Plan qty</th><th class="r">OT h</th><th class="r">OT h / 1,000</th></tr></thead><tbody>
+    ${(c.machines||[]).filter(m=>qty[m.id]).map(m=>`<tr><td>${esc(m.name)}<div class="small muted">${esc(dept(m.dept)?.name||'')}</div></td><td class="r num">${fmt(qty[m.id],0)} ${esc(m.unit)}</td><td class="r num">${fmt(mAct[m.id]||0)}</td><td class="r num">${fmt((mAct[m.id]||0)/qty[m.id]*1000,2)}</td></tr>`).join('')||'<tr><td colspan="4" class="muted">No plans in this period.</td></tr>'}</tbody></table></div></div>
+   <div class="card"><h3>Actual OT by type</h3><div class="bars">${Object.entries(byType).map(([k,v])=>`<div class="bargroup" style="grid-template-columns:110px 1fr"><div class="lbl" style="grid-row:auto">${TYPE[k]}</div><div class="track"><i style="width:${(v/tMax*100).toFixed(1)}%;background:var(--bar-3)"></i><em>${fmt(v)} h</em></div></div>`).join('')}</div>
+    <h3>Reasons for extra OT</h3>${Object.keys(reasons).length?`<table><tbody>${Object.entries(reasons).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${esc(k)}</td><td class="r num">${v}</td></tr>`).join('')}</tbody></table>`:'<p class="muted small">No requests above the calculation.</p>'}</div>
+  </div>
+  <div class="card"><h3>Most OT hours per person</h3>${top.length?`<div class="tablewrap"><table><thead><tr><th>Employee</th><th>Department</th><th class="r">Actual OT h</th></tr></thead><tbody>${top.map(([id,h])=>`<tr><td>${esc(empName(id))}</td><td>${esc(dept(emp(id)?.dept)?.name||'')}</td><td class="r num">${fmt(h)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="muted small">No actual hours entered yet.</p>'}</div>`;
+}
+
+/* ============ Setup ============ */
+function vSetup(){
+  const s=V.setup||(V.setup=JSON.parse(JSON.stringify(cfg())));s.machines=s.machines||[];if(V.setupDept===undefined)V.setupDept=s.employees.length>150?(s.employees[0]?.dept||''):'';
+  const dOpts=v=>`<option value="">–</option>`+s.depts.map(d=>`<option value="${esc(d.id)}"${d.id===v?' selected':''}>${esc(d.name)}</option>`).join('');
+  return `<div><h2>Setup</h2><p class="muted">Changes here apply to everyone after you press <b>Save setup</b>.</p></div>
+  <div class="card"><h3>Rules</h3><div class="row">
+    <label class="f grow">Normal hours / shift<input type="number" step="0.5" data-bind="s" data-p="normalHours" value="${s.normalHours}"></label>
+    <label class="f grow">Weekday OT rate<input type="number" step="0.1" data-bind="s" data-p="rateWeekday" value="${s.rateWeekday}"></label>
+    <label class="f grow">Sat / Sun rate<input type="number" step="0.1" data-bind="s" data-p="rateWeekend" value="${s.rateWeekend}"></label>
+    <label class="f grow">Public holiday rate<input type="number" step="0.1" data-bind="s" data-p="rateHoliday" value="${s.rateHoliday}"></label>
+    <label class="f grow">Yellow up to (% over calc)<input type="number" step="1" min="0" data-bind="s" data-p="tolerance" value="${s.tolerance??10}"></label>
+    <label class="f grow">Rounding to 0.5 h<select data-bind="s" data-p="rounding">${[['nearest','Nearest'],['up','Always up'],['down','Always down']].map(([k,l])=>`<option value="${k}"${s.rounding===k?' selected':''}>${l}</option>`).join('')}</select></label></div>
+    <label class="row" style="align-items:center;gap:10px"><input type="checkbox" data-bind="s" data-p="autoApprove" ${s.autoApprove?'checked':''}> Auto-approve requests within the calculated OT (skips the division manager)</label>
+    <label class="f">Planning workbook, synced twice a day (Google Sheet link)<input data-bind="s" data-p="planFeedUrl" value="${esc(s.planFeedUrl||'')}" placeholder="https://docs.google.com/spreadsheets/d/…"></label>
+    <div class="row"><label class="f grow" style="flex-basis:420px">Daily plan sheet for file loading (Google Sheet link)<input data-bind="s" data-p="planSheetUrl" value="${esc(s.planSheetUrl||'')}" placeholder="https://docs.google.com/spreadsheets/d/…"></label>
+    <label class="f grow">Scan grace (minutes)<input type="number" min="0" step="1" data-bind="s" data-p="attGrace" value="${s.attGrace??10}"></label></div>
+    <label class="f">Public holidays (YYYY-MM-DD, comma separated)<input data-bind="s" data-p="holidays" value="${esc((s.holidays||[]).join(', '))}"></label>
+    <label class="f">Reasons for extra OT (one per line)<textarea data-bind="s" data-p="reasons" style="min-height:90px;font-family:var(--f-body)">${esc(s.reasons.join('\n'))}</textarea></label></div>
+  <div class="card"><h3>Shifts</h3><div class="tablewrap"><table><thead><tr><th>Name</th><th>Start</th><th>End</th><th></th></tr></thead><tbody>
+    ${s.shifts.map((x,i)=>`<tr><td><input data-bind="sa" data-a="shifts" data-i="${i}" data-p="name" value="${esc(x.name)}"></td><td><input type="time" data-bind="sa" data-a="shifts" data-i="${i}" data-p="start" value="${esc(x.start)}"></td><td><input type="time" data-bind="sa" data-a="shifts" data-i="${i}" data-p="end" value="${esc(x.end)}"></td><td><button class="btn sm" data-act="srm" data-a="shifts" data-i="${i}">Remove</button></td></tr>`).join('')}
+    </tbody></table></div><div class="row"><button class="btn sm" data-act="sadd" data-a="shifts">Add shift</button></div></div>
+  <div class="card"><h3>Departments</h3>
+    <div class="tablewrap"><table><thead><tr><th>Code</th><th>Name</th><th>Division</th><th></th></tr></thead><tbody>
+    ${s.depts.map((x,i)=>`<tr><td style="min-width:80px"><input data-bind="sa" data-a="depts" data-i="${i}" data-p="id" value="${esc(x.id)}"></td><td style="min-width:200px"><input data-bind="sa" data-a="depts" data-i="${i}" data-p="name" value="${esc(x.name)}"></td><td style="min-width:120px"><input data-bind="sa" data-a="depts" data-i="${i}" data-p="division" value="${esc(x.division||'')}"></td><td><button class="btn sm" data-act="srm" data-a="depts" data-i="${i}">Remove</button></td></tr>`).join('')}
+    </tbody></table></div><div class="row"><button class="btn sm" data-act="sadd" data-a="depts">Add department</button></div></div>
+  <div class="card"><h3>Machines and planning rates</h3><p class="small muted">Rate = output per hour, with efficiency and downtime already included. A rate of 0 means no production calculation for that machine. Crew = people per shift on the machine (0 = not set, no headcount check).</p>
+    <div class="tablewrap"><table><thead><tr><th>Department</th><th>Machine / line</th><th>Unit</th><th class="r">Rate / h</th><th class="r">Crew</th><th></th></tr></thead><tbody>
+    ${s.machines.map((x,i)=>`<tr><td style="min-width:150px"><select data-bind="sa" data-a="machines" data-i="${i}" data-p="dept">${dOpts(x.dept)}</select></td><td style="min-width:170px"><input data-bind="sa" data-a="machines" data-i="${i}" data-p="name" value="${esc(x.name)}"></td><td style="min-width:70px"><input data-bind="sa" data-a="machines" data-i="${i}" data-p="unit" value="${esc(x.unit)}"></td><td style="min-width:100px"><input type="number" step="any" data-bind="sa" data-a="machines" data-i="${i}" data-p="rate" value="${esc(x.rate)}"></td><td style="min-width:80px"><input type="number" data-bind="sa" data-a="machines" data-i="${i}" data-p="crew" value="${esc(x.crew)}"></td><td><button class="btn sm" data-act="srm" data-a="machines" data-i="${i}">Remove</button></td></tr>`).join('')}
+    </tbody></table></div><div class="row"><button class="btn sm" data-act="sadd" data-a="machines">Add machine</button></div></div>
+  <div class="card"><h3>Staff list (${s.employees.length})</h3>
+    <p class="small muted">Paste from Excel: columns <b>Name, Shift (crew), Department, Position</b>. A header row is skipped. Department must match a department code or name above; unknown ones are added. Positions such as supervisor, manager, leader, QC are marked as management.</p>
+    <textarea id="imp" data-bind="imp" placeholder="Name&#9;Shift&#9;Department&#9;Position">${esc(V.importText)}</textarea>
+    <div class="row"><button class="btn" data-act="import" data-v="replace">Replace staff list</button><button class="btn" data-act="import" data-v="add">Add to staff list</button></div>
+    <label class="f">Show staff of<select id="sdept" data-bind="sdept"><option value="">All departments (${s.employees.length})</option>${s.depts.map(d=>{const n=s.employees.filter(e=>e.dept===d.id).length;return n?`<option value="${esc(d.id)}"${d.id===V.setupDept?' selected':''}>${esc(d.id)} ${esc(d.name)} (${n})</option>`:''}).join('')}</select></label>
+    <div class="tablewrap"><table><thead><tr><th>Name</th><th>Crew</th><th>Department</th><th>Position</th><th>OT type</th><th>Follows OT of</th><th></th></tr></thead><tbody>
+    ${s.employees.map((x,i)=>(V.setupDept&&x.dept!==V.setupDept)?'':`<tr><td style="min-width:170px"><input data-bind="sa" data-a="employees" data-i="${i}" data-p="name" value="${esc(x.name)}"></td><td style="min-width:60px"><input data-bind="sa" data-a="employees" data-i="${i}" data-p="crew" value="${esc(x.crew)}"></td><td style="min-width:140px"><select data-bind="sa" data-a="employees" data-i="${i}" data-p="dept">${dOpts(x.dept)}</select></td><td style="min-width:130px"><input data-bind="sa" data-a="employees" data-i="${i}" data-p="position" value="${esc(x.position)}"></td>
+      <td style="min-width:130px"><select data-bind="sa" data-a="employees" data-i="${i}" data-p="kind"><option value="production"${x.kind==='production'?' selected':''}>Production</option><option value="management"${x.kind==='management'?' selected':''}>Management</option></select></td>
+      <td style="min-width:140px"><select data-bind="sa" data-a="employees" data-i="${i}" data-p="link">${dOpts(x.link)}</select></td><td><button class="btn sm" data-act="srm" data-a="employees" data-i="${i}">Remove</button></td></tr>`).join('')}
+    </tbody></table></div></div>
+  <div class="card"><div class="row"><button class="btn primary" data-act="savesetup">Save setup</button><button class="btn" data-act="resetsetup">Discard changes</button></div>
+    <div class="note bad small"><b>Test data.</b> Delete every plan, request and actual entry (for example after trying the example data). Setup is kept.
+    <div class="row" style="margin-top:8px"><input class="grow" id="wipeconf" placeholder="Type DELETE to confirm" aria-label="Confirm delete"><button class="btn bad" data-act="wipe">Delete all test data</button></div></div></div>`;
+}
+const MGMT=/(หัวหน้า|ผู้จัดการ|วิศวกร|supervisor|manager|leader|head|chief|foreman|engineer|\bqc\b)/i;
+function doImport(modeV){
+  const s=V.setup,txt=V.importText.trim();if(!txt)return toast('Paste the staff list first');
+  const lines=txt.split(/\r?\n/).filter(l=>l.trim());
+  if(/name/i.test(lines[0])&&/dep/i.test(lines[0]))lines.shift();
+  const out=[];let added=0;
+  for(const ln of lines){
+    const c=(ln.includes('\t')?ln.split('\t'):ln.split(',')).map(x=>x.trim());
+    const [name,crew,dn,pos]=c;if(!name)continue;
+    const low=(dn||'').toLowerCase(),code=(dn||'').match(/^\s*(\d{3,4})\b/)?.[1];
+    let d=s.depts.find(x=>x.id.toLowerCase()===low||x.name.toLowerCase()===low||(code&&x.id===code));
+    if(!d&&dn){d={id:code||dn.replace(/[^A-Za-z0-9]/g,'').slice(0,6).toUpperCase()||'D'+s.depts.length,name:dn,division:''};while(s.depts.some(x=>x.id===d.id))d.id+='1';s.depts.push(d);added++}
+    const kind=MGMT.test(pos||'')?'management':'production';
+    out.push({id:'E'+uid(),name,crew:crew||'',dept:d?.id||'',position:pos||'',kind,link:d?.id||''});
+  }
+  s.employees=modeV==='replace'?out:s.employees.concat(out);
+  V.importText='';render();toast(`${out.length} staff imported${added?`, ${added} new department${added>1?'s':''} (set their rates)`:''}. Press Save setup.`);
+}
+async function saveSetup(){
+  const s=V.setup;const ids=s.depts.map(d=>d.id);
+  if(new Set(ids).size!==ids.length||ids.some(x=>!x))return toast('Each department needs a unique code');
+  const out={...s,example:false};
+  out.machines=s.machines.map(m=>({...m,rate:+m.rate||0,crew:+m.crew||0}));
+  ['normalHours','rateWeekday','rateWeekend','rateHoliday','tolerance','attGrace'].forEach(k=>out[k]=+(out[k]??(k==='tolerance'||k==='attGrace'?10:0)));
+  const emps=out.employees||[];delete out.employees;
+  const groups={};for(const e of emps){(groups[e.dept||'none']=groups[e.dept||'none']||[]).push([e.id,e.name,e.crew,e.position,e.kind,e.link])}
+  try{
+    await put('config','main',out);
+    for(const [d,list] of Object.entries(groups)){const cur=S.staff[d];const doc={list};if(!cur||JSON.stringify(cur.list)!==JSON.stringify(list))await put('staff',d,doc)}
+    for(const d of Object.keys(S.staff))if(!groups[d])await del('staff',d);
+    V.setup=null;toast('Setup saved')
+  }catch(e){toast('Could not save: '+(e.message||e.code))}
+}
+async function wipe(){
+  if(($('#wipeconf')?.value||'').trim()!=='DELETE')return toast('Type DELETE to confirm');
+  try{for(const c of [...COLLS,'attendance'])for(const id of Object.keys(S[c]))await del(c,id);toast('Test data deleted')}catch(e){toast('Could not delete: '+(e.message||e.code))}
+}
+
+
+/* ============ Admin: users from the HR authorization sheet ============ */
+function hrHeaderIndex(rows){for(let i=0;i<Math.min(rows.length,12);i++){const r=rows[i].map(x=>cellStr(x).toLowerCase());if(r.some(x=>x.includes('login email')))return i}return -1}
+function parseHrUsers(rows){
+  const h=hrHeaderIndex(rows);if(h<0)return {error:'Could not find the "Login email" column. Use the Users tab of the HR authorization template.'};
+  const H=rows[h].map(x=>cellStr(x).toLowerCase());const col=k=>H.findIndex(x=>x.startsWith(k));
+  const C={id:col('employee id'),name:col('full name'),email:col('login email'),role:col('role'),codes:col('department codes'),div:col('division'),active:col('active'),comp:col('company')};
+  const by={},skipped=[];
+  for(const r of rows.slice(h+1)){
+    const email=cellStr(r[C.email]).toLowerCase(),roleName=cellStr(r[C.role]);
+    if(!email&&!roleName)continue;
+    if(cellStr(r[C.id])==='60X9999'||/example/i.test(cellStr(r[C.name])))continue;
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)||!ROLE_KEYS[roleName]){skipped.push((cellStr(r[C.name])||email||'?')+(ROLE_KEYS[roleName]?'':' (role?)'));continue}
+    if(cellStr(r[C.active]).toLowerCase()!=='yes'){skipped.push((cellStr(r[C.name])||email)+' (not active)');continue}
+    const u=by[email]=by[email]||{email,name:cellStr(r[C.name]),empId:cellStr(r[C.id]),company:cellStr(r[C.comp]),roleNames:[],depts:[],divisions:[],active:true};
+    if(!u.roleNames.includes(roleName))u.roleNames.push(roleName);
+    for(const c of cellStr(r[C.codes]).split(/[,\s]+/).filter(Boolean))if(!u.depts.includes(c))u.depts.push(c);
+    const dv=cellStr(r[C.div]);if(dv&&!u.divisions.includes(dv))u.divisions.push(dv);
+  }
+  return {users:Object.values(by),skipped};
+}
+function vUsers(){
+  const list=Object.values(S.users||{}).sort((a,b)=>(a.name||a.email).localeCompare(b.name||b.email));const P=V.hrImport;
+  return `<div><h2>Users and roles</h2><p class="muted">Load the Users tab of the HR authorization sheet. Only rows with a login email, a role and Active = Yes are loaded. People with several rows get all their roles.</p></div>
+  <div class="card"><div class="row"><label class="btn primary" for="hrfile" style="display:inline-flex;align-items:center">Choose HR sheet (.xlsx)</label><input type="file" id="hrfile" accept=".xlsx,.xls,.csv" hidden></div>
+  ${P&&P.error?`<div class="note bad small">${esc(P.error)}</div>`:''}
+  ${P&&P.users?`<p class="small"><b>${P.users.length}</b> people ready to load${P.skipped.length?`, ${P.skipped.length} rows skipped: ${esc(P.skipped.slice(0,15).join(', '))}${P.skipped.length>15?'…':''}`:''}.</p>
+   <div class="row"><button class="btn primary" data-act="hrsave">Save ${P.users.length} users</button><button class="btn" data-act="hrcancel">Cancel</button></div>`:''}</div>
+  <div class="card"><h3>Current users (${list.length})</h3>${list.length?`<div class="tablewrap"><table><thead><tr><th>Name</th><th>Login email</th><th>Roles</th><th>Departments</th><th>Division</th><th></th></tr></thead><tbody>
+  ${list.map(u=>`<tr><td>${esc(u.name||'')}<div class="small muted">${esc(u.empId||'')}</div></td><td class="small">${esc(u.email)}</td><td class="small">${esc((u.roleNames||[]).join(', '))}</td><td class="small">${esc((u.depts||[]).join(', '))}</td><td class="small">${esc((u.divisions||[]).join(', '))}</td><td>${u.active===false?'<span class="pill bad">Off</span>':'<span class="pill ok">Active</span>'}</td></tr>`).join('')}
+  </tbody></table></div>`:'<div class="empty">No users yet.</div>'}</div>`;
+}
+async function hrSave(){
+  const P=V.hrImport;if(!P||!P.users)return;let n=0;
+  try{for(const u of P.users){await db.collection('users').doc(u.email).set({...u,updatedAt:new Date().toISOString(),updatedBy:me.email||''});n++}
+    V.hrImport=null;toast(`Saved ${n} users`);render()}catch(e){toast('Could not save users: '+(e.message||e.code))}
+}
+
+/* ============ Admin: data file (import / export) ============ */
+const DATA_COLLS=['staff','plans','requests','actuals','days','attendance'];
+function vData(){
+  return `<div><h2>Data</h2><p class="muted">Load the data file from the claude.ai version (settings, departments, machines, staff), or save a backup of everything.</p></div>
+  <div class="card"><h3>Load data file</h3><p class="small muted">Existing records with the same name are replaced. Nothing else is deleted.</p>
+   <div class="row"><label class="btn primary" for="datafile" style="display:inline-flex;align-items:center">Choose data file (.json)</label><input type="file" id="datafile" accept=".json" hidden></div>
+   ${V.dataMsg?`<div class="note small">${V.dataMsg}</div>`:''}</div>
+  <div class="card"><h3>Backup</h3><p class="small muted">Downloads everything in one JSON file. Keep it private: it contains staff names.</p><div class="row"><button class="btn" data-act="databackup">Download backup</button></div></div>`;
+}
+async function dataImport(file){
+  try{const o=JSON.parse(await file.text());let n=0;const writes=[];
+    if(o.config)writes.push(['config','main',o.config]);
+    for(const c of DATA_COLLS)for(const [id,d] of Object.entries(o[c]||{}))writes.push([c,id,d]);
+    V.dataMsg=`Loading ${writes.length} records…`;render();
+    for(let i=0;i<writes.length;i+=400){const b=db.batch();for(const [c,id,d] of writes.slice(i,i+400))b.set(c==='config'?db.doc('config/main'):db.collection(c).doc(id),JSON.parse(JSON.stringify(d)));await b.commit();n+=Math.min(400,writes.length-i)}
+    V.dataMsg=`Loaded ${n} records.`;render();
+  }catch(e){V.dataMsg='Could not load the file: '+esc(e.message||e.code||e);render()}
+}
+async function dataBackup(){
+  const o={config:S.config};for(const c of DATA_COLLS)o[c]=S[c];
+  const blob=new Blob([JSON.stringify(o)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='vtr-ot-backup-'+todayStr()+'.json';document.body.appendChild(a);a.click();a.remove();
+}
+/* ============ Events ============ */
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.id==='role'){role=t.value;lsSet('otp-role',role);tab=lsGet('otp-tab-'+role)||ROLES[role].tabs[0][0];render();return}
+  if(t.id==='planfile'&&t.files[0]){const f=t.files[0];t.value='';readTable(f).then(rows=>setImport(parsePlanRows(rows),'file '+f.name)).catch(e=>{V.impMsg='Could not read the file: '+esc(e.message||e);render()});return}
+  if(t.id==='attfile'&&t.files[0]){const f=t.files[0];t.value='';onAttFile(f);return}
+  if(t.id==='hrfile'&&t.files[0]){const f=t.files[0];t.value='';readTable(f,'Users').then(rows=>{V.hrImport=parseHrUsers(rows);render()}).catch(e=>{V.hrImport={error:'Could not read the file: '+(e.message||e)};render()});return}
+  if(t.id==='datafile'&&t.files[0]){const f=t.files[0];t.value='';dataImport(f);return}
+  if(t.id==='mydept'){myDept=t.value;lsSet('otp-dept',myDept);V.draft&&V.draft.editId&&(V.draft=null);V.draft&&(V.draft.sel={},V.draft.prefillKey='',V.draft.absent='',V.draft.repl='',V.draft.machine='');render();return}
+  const b=t.dataset.bind;if(!b)return;
+  const dr=V.draft;
+  switch(b){
+    case 'pdate':V.planDate=t.value;render();break;
+    case 'pshift':V.planShift=t.value;render();break;
+    case 'ddate':dr.date=t.value;dr.start='';dr.sel={};dr.prefillKey='';dr.machine='';render();break;
+    case 'dshift':dr.shift=t.value;dr.start='';dr.sel={};dr.prefillKey='';dr.machine='';render();break;
+    case 'dabsent':dr.absent=t.value;dr.repl='';render();break;
+    case 'drepl':dr.repl=t.value;refreshSum();break;
+    case 'dmach':dr.machine=t.value;dr.sel={};dr.prefillKey='';dr.reason='';render();break;
+    case 'dreason':dr.reason=t.value;break;
+    case 'dsel':{dr.touched=true;const id=t.dataset.e,h=$('#h-'+id);if(t.checked){dr.sel[id]=+h.value||0;h.disabled=false;const w=t.parentElement.querySelector('.who');if(w&&!w.querySelector('input')){const i=document.createElement('input');i.id='task-'+id;i.dataset.bind='dtask';i.dataset.e=id;i.placeholder='Task / area (optional)';i.style.cssText='margin-top:6px;min-height:36px;padding:6px 8px;font-size:14px';i.value=(dr.task||{})[id]||'';w.appendChild(i)}}else{delete dr.sel[id];h.disabled=true;t.parentElement.querySelector('.who input')?.remove()}refreshSum();break}
+    case 'dailydate':V.dailyDate=t.value;render();break;
+    case 'pfrom':V.from=t.value;V.csv='';render();break;
+    case 'pto':V.to=t.value;V.csv='';render();break;
+    case 'sfrom':V.sFrom=t.value;render();break;
+    case 'sdept':V.setupDept=t.value;render();break;
+    case 'impdate':V.imp.date=t.value;render();break;
+    case 'impshift':V.imp.shift=t.value;render();break;
+    case 'impmach':V.imp.items[+t.dataset.i].mid=t.value;render();break;
+    case 'pbasis':V.payBasis=t.value;V.csv='';render();break;
+    case 'attmap':V.att.map[t.dataset.k]=+t.value;render();break;
+    case 'divdate':V.divDate=t.value;render();break;
+    case 'dfrom':V.dFrom=t.value;render();break;
+    case 'dto':V.dTo=t.value;render();break;
+    case 'mydiv':V.myDiv=t.value;lsSet('otp-div',V.myDiv);render();break;
+    case 'sto':V.sTo=t.value;render();break;
+    case 's':case 'sa':setupBind(t);if(t.tagName==='SELECT'||t.type==='checkbox')render();break;
+  }
+});
+document.addEventListener('input',e=>{
+  const t=e.target,b=t.dataset.bind,dr=V.draft;if(!b)return;
+  switch(b){
+    case 'planqty':planPreview(t.dataset.d);break;
+    case 'dhrs':dr.touched=true;if(t.dataset.e in dr.sel){dr.sel[t.dataset.e]=+t.value||0;refreshSum()}break;
+    case 'dtask':(dr.task=dr.task||{})[t.dataset.e]=t.value;break;
+    case 'dstart':dr.start=t.value;break;
+    case 'dreplh':dr.replHours=+t.value||0;refreshSum();break;
+    case 'dnote':dr.note=t.value;break;
+    case 'imp':V.importText=t.value;break;
+    case 's':case 'sa':if(t.tagName!=='SELECT'&&t.type!=='checkbox')setupBind(t);break;
+  }
+});
+function setupBind(t){
+  const s=V.setup;if(!s)return;
+  if(t.dataset.bind==='s'){const p=t.dataset.p;
+    if(p==='autoApprove')s[p]=t.checked;else if(p==='holidays')s[p]=t.value.split(/[,\s]+/).filter(Boolean);else if(p==='reasons')s[p]=t.value.split('\n').map(x=>x.trim()).filter(Boolean);else s[p]=t.value;return}
+  const arr=s[t.dataset.a],i=+t.dataset.i,p=t.dataset.p;if(!arr[i])return;
+  if(t.dataset.a==='depts'&&p==='id'){const old=arr[i].id;s.employees.forEach(x=>{if(x.dept===old)x.dept=t.value;if(x.link===old)x.link=t.value});s.machines.forEach(m=>{if(m.dept===old)m.dept=t.value})}
+  arr[i][p]=t.value;
+}
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-act]');if(!t)return;
+  const a=t.dataset.act,dr=V.draft;
+  switch(a){
+    case 'tab':tab=t.dataset.v;lsSet('otp-tab-'+role,tab);if(tab==='setup')V.setup=null;render();window.scrollTo(0,0);break;
+    case 'saveplan':savePlan();break;
+    case 'dtype':dr.type=t.dataset.v;dr.sel={};dr.prefillKey='';dr.reason='';dr.start='';render();break;
+    case 'selcrew':{dr.touched=true;const g=t.dataset.v;dr.sel={};document.querySelectorAll('[data-bind="dsel"]').forEach(cb=>{const e=emp(cb.dataset.e);if(e&&crewGroup(e.crew)===g){const h=$('#h-'+cb.dataset.e);dr.sel[cb.dataset.e]=+h.value||0}});render();toast(`Selected ${Object.keys(dr.sel).length} people from ${crewLabel(g)}`);break}
+    case 'selnone':dr.sel={};dr.touched=true;render();break;
+    case 'copylast':{const r=lastReq(dr.type);if(!r)break;dr.sel={};dr.task={};for(const l of r.lines)if(emp(l.emp)){dr.sel[l.emp]=l.hours;if(l.task)dr.task[l.emp]=l.task}dr.start=r.lines[0]?.start||'';if(r.reason)dr.reason=r.reason;render();toast(`Copied ${Object.keys(dr.sel).length} people. Untick anyone absent.`);break}
+    case 'submitreq':submitReq();break;
+    case 'editreq':{const r=S.requests[t.dataset.id];if(!r)break;myDept=r.dept;
+      const d={...newDraft(),date:r.date,shift:r.shift,type:r.type,machine:r.machine||'',sel:{},task:{},start:r.lines[0]?.start||'',reason:r.reason||'',note:r.note||'',editId:r.id,prefillKey:'edit',touched:true};
+      if(r.type==='replacement'){const l=r.lines[0]||{};d.absent=l.absent||'';d.repl=l.emp||'';d.replHours=l.hours||+cfg().normalHours}
+      else for(const l of r.lines){d.sel[l.emp]=l.hours;if(l.task)d.task[l.emp]=l.task}
+      V.draft=d;tab='request';render();window.scrollTo(0,0);break}
+    case 'canceledit':V.draft=null;render();break;
+    case 'signin':firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>toast('Sign-in failed: '+(e.message||e.code)));break;
+    case 'signout':firebase.auth().signOut();break;
+    case 'hrsave':hrSave();break;
+    case 'hrcancel':V.hrImport=null;render();break;
+    case 'databackup':dataBackup();break;
+    case 'loadplan':loadLinkedPlan();break;
+    case 'syncnow':runSync(true);break;
+    case 'saveimport':saveImport();break;
+    case 'cancelimport':V.imp=null;V.impMsg='';render();break;
+    case 'attsave':attSave();break;
+    case 'attcancel':V.att=null;render();break;
+    case 'attfilter':V.attFilter=t.dataset.v;render();break;
+    case 'cancelreq':await del('requests',t.dataset.id);toast('Request withdrawn');break;
+    case 'fdate':V.filterDate=t.dataset.v;render();break;
+    case 'divok':await setStatus(t.dataset.id,'div_approved','Division manager approved',$('#n-'+CSS.escape(t.dataset.id))?.value);toast('Approved');break;
+    case 'divback':{const n=($('#n-'+CSS.escape(t.dataset.id))?.value||'').trim();if(!n){toast('Write in the comment what the manager should change');$('#n-'+CSS.escape(t.dataset.id))?.focus();break}await setStatus(t.dataset.id,'returned','Sent back for changes',n);toast('Sent back to the department manager');break}
+    case 'divno':await setStatus(t.dataset.id,'rejected','Division manager rejected',$('#n-'+CSS.escape(t.dataset.id))?.value);toast('Rejected');break;
+    case 'approvewithin':{const l=Object.values(S.requests).filter(r=>r.status==='pending'&&!r.over&&inMyDiv(r));for(const r of l)await setStatus(r.id,'div_approved','Division manager approved','');toast(`Approved ${l.length}`);break}
+    case 'ddate':V.dailyDate=t.dataset.v;render();break;
+    case 'divdate':V.divDate=t.dataset.v;render();break;
+    case 'dashdiv':V.dashDiv=t.dataset.v;render();break;
+    case 'divdept':{const l=Object.values(S.requests).filter(r=>r.status==='pending'&&r.date===V.divDate&&r.dept===t.dataset.v);for(const r of l)await setStatus(r.id,'div_approved','Division manager approved','');toast(`Approved ${l.length}`);break}
+    case 'approvegreen':{const l=Object.values(S.requests).filter(r=>r.status==='pending'&&r.date===V.divDate&&inMyDiv(r)&&reqColor(r)==='green');for(const r of l)await setStatus(r.id,'div_approved','Division manager approved','');toast(`Approved ${l.length}`);break}
+    case 'plantok':plantDecide(true);break;
+    case 'plantback':plantDecide(false);break;
+    case 'saveact':{const k=t.dataset.k,v=$('#act-'+CSS.escape(k)).value;if(v==='')return toast('Enter the actual run hours');const[date,sh,...dp]=k.split('_');const mid=dp.join('_');
+      try{await put('actuals',k,{date,shift:sh,machine:mid,dept:machine(mid)?.dept||'',run:+v,at:new Date().toISOString(),by:me.id||null});toast('Actual hours saved')}catch(err){toast('Could not save: '+(err.message||err.code))}break}
+    case 'worked':{const r=S.requests[t.dataset.id];if(!r)break;const lines=r.lines.map((l,i)=>i===+t.dataset.i?{...l,worked:t.dataset.v==='1'}:l);
+      try{await put('requests',r.id,{...r,lines,history:hist(r,t.dataset.v==='1'?'Confirmed worked':'Marked did not work')});toast('Saved')}catch(err){toast('Could not save')}break}
+    case 'csv':doCsv();break;
+    case 'copycsv':{const ta=$('#csvout');try{await navigator.clipboard.writeText(ta.value);toast('Copied')}catch(err){ta.select();toast('Press Ctrl+C / Cmd+C to copy')}break}
+    case 'sadd':{const s=V.setup;if(t.dataset.a==='shifts')s.shifts.push({id:'S'+uid(),name:'New shift',start:'00:00',end:'08:00'});else if(t.dataset.a==='machines')s.machines.push({id:'M'+uid(),dept:s.depts[0]?.id||'',name:'New machine',unit:'',rate:0,crew:0});else s.depts.push({id:'NEW'+s.depts.length,name:'New department',division:''});render();break}
+    case 'srm':V.setup[t.dataset.a].splice(+t.dataset.i,1);render();break;
+    case 'import':doImport(t.dataset.v);break;
+    case 'savesetup':saveSetup();break;
+    case 'resetsetup':V.setup=null;render();break;
+    case 'wipe':wipe();break;
+  }
+});
+
+render();
+initStore();
+</script>
+
+</body>
+</html>

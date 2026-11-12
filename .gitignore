@@ -1,0 +1,5 @@
+# Data files with staff names must never be committed
+*.backup.json
+vtr-ot-data*.json
+vtr-ot-backup*.json
+.DS_Store
